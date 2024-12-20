@@ -1,11 +1,10 @@
 <p align="center">
-  <img src="https://github.com/felixdittrich92/docTR-Labeler/raw/main/docs/images/logo.png" width="40%">
+  <img src="https://github.com/text2knowledge/docTR-Labeler/raw/main/docs/images/logo.png" width="40%">
 </p>
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-![Build Status](https://github.com/felixdittrich92/doctr-labeler/workflows/builds/badge.svg)
-[![codecov](https://codecov.io/gh/felixdittrich92/OnnxTR/graph/badge.svg?token=WVFRCQBOLI)](https://codecov.io/gh/felixdittrich92/OnnxTR)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4fff4d764bb14fb8b4f4afeb9587231b)](https://app.codacy.com/gh/felixdittrich92/OnnxTR/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
+![Build Status](https://github.com/text2knowledge/docTR-Labeler/workflows/builds/badge.svg)
+[![codecov](https://codecov.io/gh/text2knowledge/docTR-Labeler/graph/badge.svg?token=vrRnHbweMg)](https://codecov.io/gh/text2knowledge/docTR-Labeler)
 [![CodeFactor](https://www.codefactor.io/repository/github/felixdittrich92/onnxtr/badge)](https://www.codefactor.io/repository/github/felixdittrich92/onnxtr)
 [![Pypi](https://img.shields.io/badge/pypi-v0.6.0-blue.svg)](https://pypi.org/project/docTR-Labeler/)
 
@@ -22,7 +21,7 @@ What you can expect from this repository:
 - No Login required
 
 <p align="center">
-  <img src="https://github.com/felixdittrich92/docTR-Labeler/raw/main/docs/images/ui_screen.png" width="90%">
+  <img src="https://github.com/text2knowledge/docTR-Labeler/raw/main/docs/images/ui_screen.png" width="90%">
 </p>
 
 ## Installation
