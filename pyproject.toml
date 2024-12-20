@@ -71,10 +71,10 @@ dev = [
     "pre-commit>=2.17.0",
 ]
 
-#[project.urls]
-#repository = "https://github.com/felixdittrich92/OnnxTR"
-#tracker = "https://github.com/felixdittrich92/OnnxTR/issues"
-#changelog = "https://github.com/felixdittrich92/OnnxTR/releases"
+[project.urls]
+repository = "https://github.com/text2knowledge/docTR-Labeler"
+tracker = "https://github.com/text2knowledge/docTR-Labeler/issues"
+changelog = "https://github.com/text2knowledge/docTR-Labeler/releases"
 
 [tool.setuptools]
 zip-safe = true
