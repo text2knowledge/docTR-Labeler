@@ -1,0 +1,147 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doctr-labeler"
+description = "A Python package for labeling and annotating documents"
+authors = [{name = "Felix Dittrich", email = "felixdittrich92@gmail.com"}]
+maintainers = [
+    {name = "Felix Dittrich"},
+]
+readme = "README.md"
+requires-python = ">=3.10.0,<4"
+license = {file = "LICENSE"}
+keywords=["OCR", "document processing", "labeling", "annotation", "docTR", "OnnxTR"]
+classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Education",
+        "Intended Audience :: Science/Research",
+        "License :: OSI Approved :: Apache Software License",
+        "Natural Language :: English",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Topic :: Scientific/Engineering",
+]
+dynamic = ["version"]
+dependencies = [
+    "numpy>=1.16.0, <3.0.0",
+    "opencv-python>=4.5.0, <5.0.0",
+    "Pillow>=9.2.0",
+    "tqdm>=4.30.0",
+    "huggingface-hub>=0.23.0,<1.0.0",
+    # GUI
+    "sv-ttk>=2.6.0",
+    "darkdetect>=0.8.0",
+    # AutoML
+    # Linux & Windows
+    "onnxtr[gpu]>=0.6.0, <1.0.0; sys_platform != 'darwin'",
+    # MacOS compatibility
+    "onnxtr[cpu]>=0.6.0, <1.0.0; sys_platform == 'darwin'",
+]
+
+[project.scripts]
+doctr-labeler = "labeler.cli.main:main"
+
+[project.optional-dependencies]
+testing = [
+    "pytest>=5.3.2",
+    "pytest-xvfb>=3.0.0",
+    "coverage[toml]>=4.5.4",
+    "requests>=2.20.0",
+]
+quality = [
+    "ruff>=0.1.5",
+    "mypy>=0.812",
+    "pre-commit>=2.17.0",
+]
+dev = [
+    # Testing
+    "pytest>=5.3.2",
+    "pytest-xvfb>=3.0.0",
+    "coverage[toml]>=4.5.4",
+    "requests>=2.20.0",
+    # Quality
+    "ruff>=0.1.5",
+    "mypy>=0.812",
+    "pre-commit>=2.17.0",
+]
+
+#[project.urls]
+#repository = "https://github.com/felixdittrich92/OnnxTR"
+#tracker = "https://github.com/felixdittrich92/OnnxTR/issues"
+#changelog = "https://github.com/felixdittrich92/OnnxTR/releases"
+
+[tool.setuptools]
+zip-safe = true
+
+[tool.setuptools.packages.find]
+exclude = ["docs*", "tests*"]
+
+[tool.setuptools.package-data]
+onnxtr = ["py.typed"]
+
+[tool.mypy]
+files = "/labeler"
+show_error_codes = true
+pretty = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
+check_untyped_defs = true
+implicit_reexport = false
+
+[[tool.mypy.overrides]]
+module = [
+	"PIL.*",
+	"cv2.*",
+    "numpy.*",
+    "tkinter.*",
+    "sv_ttk.*",
+    "darkdetect.*",
+    "tqdm.*",
+    "huggingface_hub.*",
+    "onnxtr.*",
+]
+ignore_missing_imports = true
+
+[tool.ruff]
+exclude = [".git", "venv*", "build", "**/__init__.py"]
+line-length = 120
+target-version = "py310"
+preview=true
+
+[tool.ruff.lint]
+select = [
+    # https://docs.astral.sh/ruff/rules/
+    "E", "W", "F", "I", "N", "Q", "C4", "T10", "LOG",
+    "D101", "D103", "D201","D202","D207","D208","D214","D215","D300","D301","D417", "D419", "D207"  # pydocstyle
+]
+ignore = ["E402", "E203", "F403", "E731", "N812", "N817", "C408", "LOG015"]
+
+[tool.ruff.lint.isort]
+known-third-party = [
+    "numpy",
+    "cv2",
+    "PIL",
+    "tkinter",
+    "sv_ttk",
+    "darkdetect",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**.py" = ["D"]
+"scripts/**.py" = ["D"]
+".github/**.py" = ["D"]
+
+
+[tool.ruff.lint.flake8-quotes]
+docstring-quotes = "double"
+
+[tool.coverage.run]
+source = ["labeler"]
+omit = ["labeler/cli/main.py", "**/__init__.py", "labeler/version.py"]

@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    open-pull-requests-limit: 10
+    target-branch: "main"
+    labels: ["build"]
+    schedule:
+      interval: weekly
+      day: sunday
+    reviewers:
+      - "felixdittrich92"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    open-pull-requests-limit: 10
+    target-branch: "main"
+    labels: ["CI/CD"]
+    schedule:
+      interval: weekly
+      day: sunday
+    reviewers:
+      - "felixdittrich92"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
