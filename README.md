@@ -95,11 +95,10 @@ If you wish to cite please refer to the base project citation, feel free to use 
 ```bibtex
 @misc{docTR-Labeler,
     title={docTR Labeler: docTR OCR Annotation Tool},
-    # Add the authors Felix Dittrich and Devarshi Aggarwal
-    author={{Dittrich, Felix}, {Ian, List}}
+    author={{Dittrich, Felix}, {List, Ian}},
     year={2024},
     publisher = {GitHub},
-    howpublished = {\url{https://github.com/felixdittrich92/docTR-Labeler}}
+    howpublished = {\url{https://github.com/text2knowledge/docTR-Labeler}}
 }
 ```
 
