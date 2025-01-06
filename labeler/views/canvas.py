@@ -49,6 +49,35 @@ class ImageOnCanvas:
         self.drawing_polygon = False
         self.current_saved = True
 
+        # Bind mousewheel events with the Ctrl key
+        self.canvas.bind("<Control-MouseWheel>", self.zoom)  # For Windows
+        self.canvas.bind("<Control-Button-4>", self.zoom)   # For Linux/Mac scroll up
+        self.canvas.bind("<Control-Button-5>", self.zoom)   # For Linux/Mac scroll down
+
+    def zoom(self, event):
+        """Handle zooming in and out."""
+        zoom_step = 0.1  # Zoom step size
+        if event.num == 4 or event.delta > 0:  # Zoom in (scroll up)
+            self.scale_factor += zoom_step
+        elif event.num == 5 or event.delta < 0:  # Zoom out (scroll down)
+            self.scale_factor = max(0.1, self.scale_factor - zoom_step)  # Prevent zooming too far out
+        # Apply the scale change to your canvas or objects
+        self.apply_zoom()
+
+    def apply_zoom(self):
+        """Apply the zoom scaling to all canvas elements."""
+        self.canvas.scale("all", 0, 0, self.scale_factor, self.scale_factor)
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+
+        logger.info(f"Zoom: scale_factor={self.scale_factor}")
+        self.redraw_polygons()
+
+    def redraw_polygons(self):
+        """Redraw polygons with updated scale factor."""
+        with self.polygons_mutex:
+            for polygon in self.polygons:
+                polygon.redraw(self.scale_factor)
+
     def current_state(self) -> tuple[list[Polygon], bool]:
         """
         Get the current state of the polygons

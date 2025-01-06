@@ -57,6 +57,21 @@ class Polygon:
         self.canvas.tag_bind(self.polygon, "<ButtonPress-1>", self.down_poly)
         self.canvas.tag_bind(self.polygon, "<ButtonRelease-1>", self.chkup_poly)
 
+    def redraw(self, scale_factor):
+        """Redraw the polygon with updated scale factor."""
+        self.pt_coords = [[int(x * scale_factor), int(y * scale_factor)] for x, y in self.pt_coords]
+        self.update_polygon()
+        self.draw_points()
+
+    def draw_points(self):
+        """Draw points around the polygon edges."""
+        for point in self.pt_coords:
+            self.canvas.create_oval(
+                point[0] - self.radius, point[1] - self.radius,
+                point[0] + self.radius, point[1] + self.radius,
+                fill="black"
+            )
+
     def enter_poly(self, event: Event | None = None):
         """
         Change the color of the polygon when the cursor enters it
