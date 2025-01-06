@@ -1,4 +1,4 @@
-# Copyright (C) 2024-2024, Felix Dittrich | Ian List | Devarshi Aggarwal.
+# Copyright (C) 2024-2025, Felix Dittrich | Ian List | Devarshi Aggarwal.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
