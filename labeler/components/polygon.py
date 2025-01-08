@@ -60,19 +60,15 @@ class Polygon:
 
     def redraw(self, scale_factor):
         """Redraw the polygon with updated scale factor."""
-        self.pt_coords = [[int(x * scale_factor), int(y * scale_factor)] for x, y in self.original_coords]
+        #self.pt_coords = [[int(x * scale_factor), int(y * scale_factor)] for x, y in self.original_coords]
+        # TODO: Following two lines are new
+        self.pt_coords = [[x * scale_factor, y * scale_factor] for x, y in self.original_coords]
+        # TODO: THE ISSUE IS 100% HERE !!!
+        #self.original_coords = self.pt_coords.copy()
         # TODO: This does not work if we change something and zoom afterwards again
+
         self.update_polygon()
         self.draw_points()
-
-    def draw_points(self):
-        """Draw points around the polygon edges."""
-        for point in self.pt_coords:
-            self.canvas.create_oval(
-                point[0] - self.radius, point[1] - self.radius,
-                point[0] + self.radius, point[1] + self.radius,
-                fill="black"
-            )
 
     def enter_poly(self, event: Event | None = None):
         """
