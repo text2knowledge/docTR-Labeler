@@ -28,6 +28,7 @@ class Polygon:
         self.enter_status = [0] * len(pts)
         self.drag_status = [0] * len(pts)
         self.pt_coords = pts
+        self.original_coords = pts.copy()
         self.point_in_use = None
         self.poly_type = poly_type or self.root.type_options[0]
         self.text = text
@@ -59,7 +60,8 @@ class Polygon:
 
     def redraw(self, scale_factor):
         """Redraw the polygon with updated scale factor."""
-        self.pt_coords = [[int(x * scale_factor), int(y * scale_factor)] for x, y in self.pt_coords]
+        self.pt_coords = [[int(x * scale_factor), int(y * scale_factor)] for x, y in self.original_coords]
+        # TODO: This does not work if we change something and zoom afterwards again
         self.update_polygon()
         self.draw_points()
 

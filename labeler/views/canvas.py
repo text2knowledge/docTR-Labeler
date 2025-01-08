@@ -49,24 +49,34 @@ class ImageOnCanvas:
         self.drawing_polygon = False
         self.current_saved = True
 
-        # Bind mousewheel events with the Ctrl key
-        self.canvas.bind("<Control-MouseWheel>", self.zoom)  # For Windows
-        self.canvas.bind("<Control-Button-4>", self.zoom)   # For Linux/Mac scroll up
-        self.canvas.bind("<Control-Button-5>", self.zoom)   # For Linux/Mac scroll down
+        # Bind zoom events
+        self.root.bind("<Control-Key-plus>", self.zoom)
+        self.root.bind("<Control-Key-minus>", self.zoom)
+        self.root.bind("<Control-Key-equal>", self.zoom)  # For keyboards where '+' is 'Shift + ='
+
 
     def zoom(self, event):
         """Handle zooming in and out."""
         zoom_step = 0.1  # Zoom step size
-        if event.num == 4 or event.delta > 0:  # Zoom in (scroll up)
+        # TODO: Add hard limits to zooming
+        if event.keysym in ["plus", "equal", "KP_Add"]:  # Zoom in
             self.scale_factor += zoom_step
-        elif event.num == 5 or event.delta < 0:  # Zoom out (scroll down)
-            self.scale_factor = max(0.1, self.scale_factor - zoom_step)  # Prevent zooming too far out
-        # Apply the scale change to your canvas or objects
+        elif event.keysym in ["minus", "KP_Subtract"]:  # Zoom out
+            self.scale_factor -= zoom_step
         self.apply_zoom()
 
+
     def apply_zoom(self):
-        """Apply the zoom scaling to all canvas elements."""
-        self.canvas.scale("all", 0, 0, self.scale_factor, self.scale_factor)
+        """Apply the zoom scaling to all canvas elements and resize the image."""
+        # Resize the image
+        new_width = int(self.img_width * self.scale_factor)
+        new_height = int(self.img_height * self.scale_factor)
+        resized_img = self.img.resize((new_width, new_height))
+        self.img = resized_img
+        self.imagetk = ImageTk.PhotoImage(resized_img)
+
+        # Update the canvas image
+        self.canvas.itemconfig(self.canvas_img, image=self.imagetk)
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
         logger.info(f"Zoom: scale_factor={self.scale_factor}")
@@ -197,7 +207,7 @@ class ImageOnCanvas:
             img_name = os.path.split(self.image_path)[-1]
             polygons_data = [
                 {
-                    "polygon": [[int(x), int(y)] for x, y in polygon.pt_coords],
+                    "polygon": [[int(x // self.scale_factor), int(y // self.scale_factor)] for x, y in polygon.pt_coords],
                     "label": polygon.text or "",
                     "type": polygon.poly_type or "words",
                 }
