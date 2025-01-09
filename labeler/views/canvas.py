@@ -138,7 +138,7 @@ class ImageOnCanvas:
         Args:
             polygon: Polygon: The polygon to label
         """
-        coords = polygon.pt_coords
+        coords = polygon.original_coords
         pre_label = auto_annotator.predict_label(self.image_path, coords)
         polygon.text = pre_label
 
@@ -290,19 +290,13 @@ class ImageOnCanvas:
                 Polygon(self.root, self.canvas, poly, poly_type, poly_text)
                 for poly, poly_type, poly_text in zip(scaled_coords, poly_types, poly_texts)
             )
+            # Update also the original coordinates for accurate scaling to the original image size
+            for polygon in self.polygons:
+                polygon.original_coords = [
+                    [int(x // self.scale_factor), int(y // self.scale_factor)] for x, y in polygon.pt_coords
+                ]
 
         logger.info(f"Total Polygons drawn: {len(self.polygons)}")
-
-    # def add_poly(self, pts: list[list[int]]):
-    #    """
-    #    Add a polygon to the canvas
-
-    #    Args:
-    #        pts: list[list[int]]: List of points of the polygon
-    #    """
-    #    scaled_pts = [[int(x * self.scale_factor) for x in point] for point in pts]
-    #    self.polygons.append(Polygon(self.root, self.canvas, scaled_pts))
-    #    logger.info(f"Total Polygons drawn: {len(self.polygons)}")
 
     def add_poly(self, pts: list[list[int]]):
         """

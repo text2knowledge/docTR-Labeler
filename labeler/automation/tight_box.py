@@ -41,7 +41,6 @@ class TightBox:
                 original_pts = [[pt[0] / self.cnv.scale_factor, pt[1] / self.cnv.scale_factor] for pt in p.pt_coords]
                 self.changed_poly.append([p, original_pts])
 
-                # Perform OpenCV operations on original scale
                 cnts = np.array(original_pts).reshape((-1, 1, 2)).astype(np.int32)
                 img = cv2.imread(self.cnv.image_path)
                 img = cv2.resize(img, self.cnv.img.size, interpolation=cv2.INTER_AREA)
@@ -51,15 +50,14 @@ class TightBox:
                 _, img = cv2.threshold(img, int(self.thresh), 255, cv2.THRESH_BINARY)
                 new_img = cv2.bitwise_and(img, img, mask=mask)
 
-                # Find new contours
                 new_cnts, _ = cv2.findContours(new_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                 new_cnts = sorted(new_cnts, key=cv2.contourArea, reverse=True)[1:]
                 all_pts = [pt for ct in new_cnts for pt in ct]
 
-                # Min-area rectangle
                 min_area_rect = cv2.minAreaRect(np.array(all_pts).reshape((-1, 1, 2)).astype(np.int32))
                 center, size, angle = min_area_rect
                 w, h = size
+
                 if w < 5 or h < 6:
                     continue  # Skip polygons with too small areas
 
