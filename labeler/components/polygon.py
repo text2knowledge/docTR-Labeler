@@ -28,7 +28,7 @@ class Polygon:
         self.enter_status = [0] * len(pts)
         self.drag_status = [0] * len(pts)
         self.pt_coords = pts
-        self.original_coords = pts.copy()
+        self.original_coords = pts
         self.point_in_use = None
         self.poly_type = poly_type or self.root.type_options[0]
         self.text = text
@@ -57,18 +57,6 @@ class Polygon:
         self.canvas.tag_bind(self.polygon, "<Leave>", self.leave_poly)
         self.canvas.tag_bind(self.polygon, "<ButtonPress-1>", self.down_poly)
         self.canvas.tag_bind(self.polygon, "<ButtonRelease-1>", self.chkup_poly)
-
-    def redraw(self, scale_factor):
-        """Redraw the polygon with updated scale factor."""
-        #self.pt_coords = [[int(x * scale_factor), int(y * scale_factor)] for x, y in self.original_coords]
-        # TODO: Following two lines are new
-        self.pt_coords = [[x * scale_factor, y * scale_factor] for x, y in self.original_coords]
-        # TODO: THE ISSUE IS 100% HERE !!!
-        #self.original_coords = self.pt_coords.copy()
-        # TODO: This does not work if we change something and zoom afterwards again
-
-        self.update_polygon()
-        self.draw_points()
 
     def enter_poly(self, event: Event | None = None):
         """

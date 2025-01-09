@@ -6,7 +6,7 @@ from pathlib import Path
 
 def test_copyright_header():
     copyright_header = "".join([
-        f"# Copyright (C) {2024}-{datetime.now().year}, Felix Dittrich | Ian List | Devarshi Aggarwal.\n\n",
+        f"# Copyright (C) {2025}-{datetime.now().year}, Felix Dittrich | Ian List | Devarshi Aggarwal.\n\n",
         "# This program is licensed under the Apache License 2.0.\n",
         "# See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.\n",
     ])

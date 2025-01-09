@@ -11,7 +11,9 @@ from labeler.automation import TightBox
 def mock_polygon():
     polygon = Mock()
     polygon.select_poly = True
-    polygon.points = [Mock(), Mock(), Mock(), Mock()]
+    # Mocking pt_coords with tuples to allow arithmetic operations
+    polygon.pt_coords = [(10, 20), (20, 20), (20, 10), (10, 10)]
+    polygon.points = [Mock() for _ in range(4)]
     polygon.get_pt_center = Mock(side_effect=lambda pt: (10, 20))
     polygon.update_point = Mock()
     polygon.update_polygon = Mock()
@@ -25,6 +27,7 @@ def mock_canvas(mock_polygon):
     canvas.current_state = Mock(return_value=([mock_polygon],))
     canvas.image_path = "path/to/image.jpg"
     canvas.img.size = (100, 100)
+    canvas.scale_factor = 1  # Setting a mock scale_factor value
     canvas.canvas.update = Mock()
     return canvas
 
@@ -67,7 +70,8 @@ def test_tight_box_skips_small_polygons(tight_box, mock_polygon):
     cv2.findContours = Mock(
         return_value=([np.array([[[10, 10]], [[20, 10]], [[20, 20]], [[10, 20]]], dtype=np.int32)], None)
     )
-    cv2.minAreaRect = Mock(return_value=((15, 15), (5, 5), 0))  # Width and height less than 10
+    # Mock for a small polygon, below the threshold
+    cv2.minAreaRect = Mock(return_value=((15, 15), (4, 4), 0))  # Width and height less than 5
 
     tight_box.tight_box()
 

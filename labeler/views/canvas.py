@@ -10,6 +10,7 @@ from threading import Lock
 from typing import Any
 
 from PIL import Image, ImageTk
+from tkinter import Event
 
 from ..automation import auto_annotator
 from ..components import Polygon
@@ -54,17 +55,25 @@ class ImageOnCanvas:
         self.root.bind("<Control-Key-minus>", self.zoom)
         self.root.bind("<Control-Key-equal>", self.zoom)  # For keyboards where '+' is 'Shift + ='
 
-
-    def zoom(self, event):
+    def zoom(self, event: Event | None = None):
         """Handle zooming in and out."""
         zoom_step = 0.1  # Zoom step size
-        # TODO: Add hard limits to zooming
-        if event.keysym in ["plus", "equal", "KP_Add"]:  # Zoom in
-            self.scale_factor += zoom_step
-        elif event.keysym in ["minus", "KP_Subtract"]:  # Zoom out
-            self.scale_factor -= zoom_step
-        self.apply_zoom()
+        max_zoom = 1.5  # Maximum zoom (150% of the original size)
+        min_zoom = 0.5  # Minimum zoom (50% of the original size)
+        previous_scale_factor = self.scale_factor
 
+        # Zoom in
+        if event.keysym in ["plus", "equal", "KP_Add"]:  # type: ignore[union-attr]
+            if self.scale_factor < max_zoom:
+                self.scale_factor += zoom_step
+
+        # Zoom out
+        elif event.keysym in ["minus", "KP_Subtract"]:  # type: ignore[union-attr]
+            if self.scale_factor > min_zoom:
+                self.scale_factor -= zoom_step
+
+        if self.scale_factor != previous_scale_factor:
+            self.apply_zoom()
 
     def apply_zoom(self):
         """Apply the zoom scaling to all canvas elements and resize the image."""
@@ -72,21 +81,23 @@ class ImageOnCanvas:
         new_width = int(self.img_width * self.scale_factor)
         new_height = int(self.img_height * self.scale_factor)
         resized_img = self.img.resize((new_width, new_height))
-        self.img = resized_img
         self.imagetk = ImageTk.PhotoImage(resized_img)
 
         # Update the canvas image
         self.canvas.itemconfig(self.canvas_img, image=self.imagetk)
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
-        logger.info(f"Zoom: scale_factor={self.scale_factor}")
-        self.redraw_polygons()
-
-    def redraw_polygons(self):
-        """Redraw polygons with updated scale factor."""
         with self.polygons_mutex:
             for polygon in self.polygons:
-                polygon.redraw(self.scale_factor)
+                # Calculate new coordinates based on original ones
+                polygon.pt_coords = [
+                    [int(x * self.scale_factor), int(y * self.scale_factor)]
+                    for x, y in polygon.original_coords  # Use original unscaled coordinates
+                ]
+                polygon.update_polygon()
+                polygon.draw_points()
+
+        logger.info(f"Zoom applied: scale_factor={self.scale_factor}")
 
     def current_state(self) -> tuple[list[Polygon], bool]:
         """
@@ -207,7 +218,9 @@ class ImageOnCanvas:
             img_name = os.path.split(self.image_path)[-1]
             polygons_data = [
                 {
-                    "polygon": [[int(x // self.scale_factor), int(y // self.scale_factor)] for x, y in polygon.pt_coords],
+                    "polygon": [
+                        [int(x // self.scale_factor), int(y // self.scale_factor)] for x, y in polygon.pt_coords
+                    ],
                     "label": polygon.text or "",
                     "type": polygon.poly_type or "words",
                 }
@@ -280,13 +293,26 @@ class ImageOnCanvas:
 
         logger.info(f"Total Polygons drawn: {len(self.polygons)}")
 
+    # def add_poly(self, pts: list[list[int]]):
+    #    """
+    #    Add a polygon to the canvas
+
+    #    Args:
+    #        pts: list[list[int]]: List of points of the polygon
+    #    """
+    #    scaled_pts = [[int(x * self.scale_factor) for x in point] for point in pts]
+    #    self.polygons.append(Polygon(self.root, self.canvas, scaled_pts))
+    #    logger.info(f"Total Polygons drawn: {len(self.polygons)}")
+
     def add_poly(self, pts: list[list[int]]):
         """
-        Add a polygon to the canvas
+        Add a polygon to the canvas.
 
         Args:
-            pts: list[list[int]]: List of points of the polygon
+            pts: list[list[int]]: List of points of the polygon.
         """
-        scaled_pts = [[int(x * self.scale_factor) for x in point] for point in pts]
-        self.polygons.append(Polygon(self.root, self.canvas, scaled_pts))
-        logger.info(f"Total Polygons drawn: {len(self.polygons)}")
+        scaled_pts = [[int(x * self.scale_factor), int(y * self.scale_factor)] for x, y in pts]
+        polygon = Polygon(self.root, self.canvas, scaled_pts)
+        polygon.original_coords = pts  # Store unscaled coordinates for accurate scaling
+        self.polygons.append(polygon)
+        logger.info(f"Added polygon. Total: {len(self.polygons)}")
