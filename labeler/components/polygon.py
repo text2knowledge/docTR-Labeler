@@ -173,7 +173,7 @@ class Polygon:
         Draw the points on the canvas by updating their coordinates and then raising them on the canvas
         """
         for i in range(len(self.points)):
-            self.update_point(self.points[i], self.pt_coords[i][0], self.pt_coords[i][1])
+            self.update_point(self.points[i], int(self.pt_coords[i][0]), int(self.pt_coords[i][1]))
         for pt in self.points:
             self.canvas.tag_raise(pt)
 
@@ -207,7 +207,7 @@ class Polygon:
         Update the polygon according to the changed point in the polygon
         """
         self.canvas.coords(self.polygon, *self._flatten())
-        self.pt_coords = [[int(x), int(y)] for x, y in self.pt_coords]
+        self.pt_coords = [[x, y] for x, y in self.pt_coords]
 
     def down(self, event: Event):
         """

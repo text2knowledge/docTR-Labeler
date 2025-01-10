@@ -47,6 +47,9 @@ pip3 install doctr-labeler
 - `Ctrl + s` : Save the current progress / image annotation
 - `Ctrl + d` : Delete the selected polygon
 
+- `Ctrl + +` : Zoom in (up to 150%)
+- `Ctrl + -` : Zoom out (down to 50%)
+
 ## Usage CLI
 
 After installation you can use the CLI to start the tool:
