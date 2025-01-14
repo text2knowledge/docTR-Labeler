@@ -47,8 +47,8 @@ pip3 install doctr-labeler
 - `Ctrl + s` : Save the current progress / image annotation
 - `Ctrl + d` : Delete the selected polygon
 
-- `Ctrl + +` : Zoom in (up to 150%)
-- `Ctrl + -` : Zoom out (down to 50%)
+- `Ctrl + +` : Zoom in (up to 150%) - Can be changed by setting a environment variable `DOCTR_LABELER_MAX_ZOOM` to a value between 1.1 and 3.0
+- `Ctrl + -` : Zoom out (down to 50%) - Can be changed by setting a environment variable `DOCTR_LABELER_MIN_ZOOM` to a value between 0.5 and 0.9
 
 ## Usage CLI
 

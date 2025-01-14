@@ -33,6 +33,7 @@ class Polygon:
         self.poly_type = poly_type or self.root.type_options[0]
         self.text = text
         self.radius = 1
+        self.scale_factor = 1
         self.inside_poly = False
         self.down_inside_poly = False
         self.select_poly = False
@@ -169,16 +170,21 @@ class Polygon:
         """
         pass
 
-    def draw_points(self):
+    def draw_points(self, update_original: bool = False):
         """
         Draw the points on the canvas by updating their coordinates and then raising them on the canvas
+
+        Args:
+            update_original: bool: Whether to update the original coordinates of the points (default: False)
         """
         for i in range(len(self.points)):
-            self.update_point(self.points[i], self.pt_coords[i][0], self.pt_coords[i][1])
+            self.update_point(
+                self.points[i], self.pt_coords[i][0], self.pt_coords[i][1], update_original=update_original
+            )
         for pt in self.points:
             self.canvas.tag_raise(pt)
 
-    def update_point(self, point_id: str | int, x: int, y: int):
+    def update_point(self, point_id: str | int, x: int, y: int, update_original: bool = False):
         """
         Update the coordinates of a point on the canvas
 
@@ -186,9 +192,12 @@ class Polygon:
             point_id: str | int: The id of the point to update
             x: int: The x-coordinate of the point
             y: int: The y-coordinate of the point
+            update_original: bool: Whether to update the original coordinates of the point
         """
         self.canvas.coords(point_id, x - self.radius, y - self.radius, x + self.radius, y + self.radius)
         self.pt_coords[self.points.index(point_id)] = [x, y]
+        if update_original:
+            self.original_coords[self.points.index(point_id)] = [int(x / self.scale_factor), int(y / self.scale_factor)]
 
     def get_pt_center(self, point_id: str | int):
         """
@@ -209,6 +218,7 @@ class Polygon:
         """
         self.canvas.coords(self.polygon, *self._flatten())
         self.pt_coords = [[int(x), int(y)] for x, y in self.pt_coords]
+        self.original_coords = [[int(x), int(y)] for x, y in self.original_coords]
 
     def down(self, event: Event):
         """
@@ -227,7 +237,9 @@ class Polygon:
         self.root.config(cursor="crosshair")
         self.point_in_use = event.widget
         pt = self.canvas.find_withtag("current")[0]
-        self.update_point(pt, self.point_in_use.canvasx(event.x), self.point_in_use.canvasy(event.y))  # type: ignore[attr-defined]
+        self.update_point(
+            pt, self.point_in_use.canvasx(event.x), self.point_in_use.canvasy(event.y), update_original=True
+        )  # type: ignore[attr-defined]
         self.update_polygon()
         self.draw_points()
 

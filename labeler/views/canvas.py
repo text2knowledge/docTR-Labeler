@@ -58,8 +58,8 @@ class ImageOnCanvas:
     def zoom(self, event: Event | None = None):
         """Handle zooming in and out."""
         zoom_step = 0.1  # Zoom step size
-        max_zoom = 1.5  # Maximum zoom (150% of the original size)
-        min_zoom = 0.5  # Minimum zoom (50% of the original size)
+        max_zoom = max(float(os.environ.get("DOCTR_LABELER_MAX_ZOOM", 1.5)), 3.0)  # Maximum zoom
+        min_zoom = max(float(os.environ.get("DOCTR_LABELER_MIN_ZOOM", 0.5)), 0.1)  # Minimum zoom
         previous_scale_factor = self.scale_factor
 
         # Zoom in
@@ -89,6 +89,7 @@ class ImageOnCanvas:
 
         with self.polygons_mutex:
             for polygon in self.polygons:
+                polygon.scale_factor = self.scale_factor
                 # Calculate new coordinates based on original ones
                 polygon.pt_coords = [
                     [int(x * self.scale_factor), int(y * self.scale_factor)]
@@ -218,9 +219,7 @@ class ImageOnCanvas:
             img_name = os.path.split(self.image_path)[-1]
             polygons_data = [
                 {
-                    "polygon": [
-                        [int(x // self.scale_factor), int(y // self.scale_factor)] for x, y in polygon.pt_coords
-                    ],
+                    "polygon": [[x // self.scale_factor, y // self.scale_factor] for x, y in polygon.pt_coords],
                     "label": polygon.text or "",
                     "type": polygon.poly_type or "words",
                 }
