@@ -304,7 +304,6 @@ def test_load_directory(gui_app):
         assert gui_app.images_in_dir == ["image1.png", "image2.jpg"]
         gui_app.show_buttons.assert_called_once()
         gui_app.next_img.assert_called_once()
-        gui_app.load_image_directory_button.configure.assert_called_once_with(state="disabled")
 
 
 def test_jump_to_image(gui_app):

@@ -437,7 +437,6 @@ class GUI(tk.Tk):
             # Show UI components and load the next image
             self.show_buttons()
             self.next_img()
-            self.load_image_directory_button.configure(state="disabled")
 
         except Exception as e:
             self.pop_up(f"Error accessing the selected directory: {e}")
@@ -468,6 +467,7 @@ class GUI(tk.Tk):
         def on_save():
             top.destroy()
             self.saver()
+            self.load_new_img()
 
         # Define the 'Dismiss' button action
         dismiss_button = ttk.Button(button_frame, text="Dismiss", command=on_dismiss, width=self.button_width * 2)
