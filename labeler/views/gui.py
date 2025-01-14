@@ -422,7 +422,7 @@ class GUI(tk.Tk):
             if self.cli_usage:
                 directory = filedialog.askdirectory()
             else:
-                directory = self.image_dir
+                directory = self.image_dir  # type: ignore[assignment]
 
             if not directory:
                 return

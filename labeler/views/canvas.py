@@ -58,8 +58,8 @@ class ImageOnCanvas:
     def zoom(self, event: Event | None = None):
         """Handle zooming in and out."""
         zoom_step = 0.1  # Zoom step size
-        max_zoom = max(float(os.environ.get("DOCTR_LABELER_MAX_ZOOM", 1.5)), 3.0)  # Maximum zoom
-        min_zoom = max(float(os.environ.get("DOCTR_LABELER_MIN_ZOOM", 0.5)), 0.1)  # Minimum zoom
+        max_zoom = min(float(os.environ.get("DOCTR_LABELER_MAX_ZOOM", 1.5)), 2.0)  # Maximum zoom capped at 2.0
+        min_zoom = max(float(os.environ.get("DOCTR_LABELER_MIN_ZOOM", 0.5)), 0.1)  # Minimum zoom capped at 0.1
         previous_scale_factor = self.scale_factor
 
         # Zoom in

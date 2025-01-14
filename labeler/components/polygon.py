@@ -33,7 +33,7 @@ class Polygon:
         self.poly_type = poly_type or self.root.type_options[0]
         self.text = text
         self.radius = 1
-        self.scale_factor = 1
+        self.scale_factor = 1.0
         self.inside_poly = False
         self.down_inside_poly = False
         self.select_poly = False
@@ -238,8 +238,11 @@ class Polygon:
         self.point_in_use = event.widget
         pt = self.canvas.find_withtag("current")[0]
         self.update_point(
-            pt, self.point_in_use.canvasx(event.x), self.point_in_use.canvasy(event.y), update_original=True
-        )  # type: ignore[attr-defined]
+            pt,
+            self.point_in_use.canvasx(event.x),  # type: ignore[attr-defined]
+            self.point_in_use.canvasy(event.y),  # type: ignore[attr-defined]
+            update_original=True,
+        )
         self.update_polygon()
         self.draw_points()
 
