@@ -37,13 +37,11 @@ class TightBox:
         """
         for p in self.cnv.current_state()[0]:
             if p.select_poly:
-                cnt = []
-                for pt in p.points:
-                    cnt.append(p.get_pt_center(pt))
-                self.changed_poly.append([p, cnt])
-                cnts = np.array(cnt).reshape((-1, 1, 2)).astype(np.int32)
+                # Save original points for revert functionality
+                original_pts = [[pt[0] / self.cnv.scale_factor, pt[1] / self.cnv.scale_factor] for pt in p.pt_coords]
+                self.changed_poly.append([p, original_pts])
 
-                # Load and preprocess the image
+                cnts = np.array(original_pts).reshape((-1, 1, 2)).astype(np.int32)
                 img = cv2.imread(self.cnv.image_path)
                 img = cv2.resize(img, self.cnv.img.size, interpolation=cv2.INTER_AREA)
                 mask = np.zeros(img.shape[:2], np.uint8)
@@ -52,45 +50,46 @@ class TightBox:
                 _, img = cv2.threshold(img, int(self.thresh), 255, cv2.THRESH_BINARY)
                 new_img = cv2.bitwise_and(img, img, mask=mask)
 
-                # Find new contours in the masked image
                 new_cnts, _ = cv2.findContours(new_img, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
                 new_cnts = sorted(new_cnts, key=cv2.contourArea, reverse=True)[1:]
                 all_pts = [pt for ct in new_cnts for pt in ct]
 
-                # Find the min-area rotated rectangle
                 min_area_rect = cv2.minAreaRect(np.array(all_pts).reshape((-1, 1, 2)).astype(np.int32))
-                box = cv2.boxPoints(min_area_rect)
-                box = np.intp(box)  # type: ignore[assignment]
-
-                # Get the center, width, height, and angle from the min-area rectangle
                 center, size, angle = min_area_rect
                 w, h = size
-                # If the width or height is less than 10, skip the polygon to avoid deletion
-                if w < 10 or h < 10:
-                    continue
 
-                # Expand by 2 pixels on each side (increase width and height)
+                if w < 5 or h < 5:
+                    continue  # Skip polygons with too small areas
+
+                # Expand by 2 pixels
                 size = (w + 2, h + 2)
-
-                # Use the expanded size to create the new rotated rectangle
                 expanded_rect = cv2.boxPoints(((center[0], center[1]), size, angle))
                 expanded_rect = np.intp(expanded_rect)  # type: ignore[assignment]
 
-                # Update polygon points to match the expanded rotated rectangle
+                # Update points to match the expanded rotated rectangle
                 for i, point in enumerate(p.points):
-                    p.update_point(point, expanded_rect[i][0], expanded_rect[i][1])
+                    new_x = expanded_rect[i][0] * self.cnv.scale_factor
+                    new_y = expanded_rect[i][1] * self.cnv.scale_factor
+                    p.update_point(point, new_x, new_y)
 
+                # Update original coordinates scaled to the original image size
+                p.original_coords = [
+                    [int(x / self.cnv.scale_factor), int(y / self.cnv.scale_factor)] for x, y in p.pt_coords
+                ]
                 p.update_polygon()
                 p.draw_points()
 
     def discard_tight_box(self):
         """
-        Discard the changes made to the polygons by the tight_box method
+        Discard changes made by the `tight_box` method.
         """
-        for p, pts in self.changed_poly:
+        for p, original_pts in self.changed_poly:
             for i, pt in enumerate(p.points):
-                p.update_point(pt, pts[i][0], pts[i][1])
+                original_x = original_pts[i][0] * self.cnv.scale_factor
+                original_y = original_pts[i][1] * self.cnv.scale_factor
+                p.update_point(pt, original_x, original_y)
+
             p.update_polygon()
             p.draw_points()
-            p.pt_coords = pts
+        self.changed_poly = []  # Clear the history of changes
         self.cnv.canvas.update()

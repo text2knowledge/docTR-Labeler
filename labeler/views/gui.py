@@ -26,15 +26,18 @@ class GUI(tk.Tk):
     Keyword Args:
         text_types (list): A list of text types to be used for labeling. Default is ["words"].
         image_folder (str): The path to the folder containing images. Default is None.
+        cli (bool): A flag to indicate if the GUI is being used in CLI mode. Default is False.
     """
 
     def __init__(self, *args, **kwargs):
         text_types = kwargs.get("text_types", ["words"])
         self.image_folder = kwargs.get("image_folder", None)
+        self.cli_usage = kwargs.get("cli", False)
         # Set default type which should be "words"
         self.type_options = text_types if "words" in text_types else ["words"] + text_types
         kwargs.pop("text_types", None)
         kwargs.pop("image_folder", None)
+        kwargs.pop("cli", None)
         super().__init__(*args, **kwargs)
 
         # configure window
@@ -416,8 +419,11 @@ class GUI(tk.Tk):
                 return []
 
         try:
-            # If a directory is already set, use it; otherwise, prompt for a new one
-            directory = self.image_dir or filedialog.askdirectory()
+            if self.cli_usage:
+                directory = filedialog.askdirectory()
+            else:
+                directory = self.image_dir  # type: ignore[assignment]
+
             if not directory:
                 return
 
@@ -437,7 +443,6 @@ class GUI(tk.Tk):
             # Show UI components and load the next image
             self.show_buttons()
             self.next_img()
-            self.load_image_directory_button.configure(state="disabled")
 
         except Exception as e:
             self.pop_up(f"Error accessing the selected directory: {e}")
@@ -468,6 +473,7 @@ class GUI(tk.Tk):
         def on_save():
             top.destroy()
             self.saver()
+            self.load_new_img()
 
         # Define the 'Dismiss' button action
         dismiss_button = ttk.Button(button_frame, text="Dismiss", command=on_dismiss, width=self.button_width * 2)

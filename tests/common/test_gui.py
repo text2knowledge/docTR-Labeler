@@ -291,6 +291,7 @@ def test_load_directory(gui_app):
     gui_app.show_buttons = Mock()
     gui_app.next_img = Mock()
     gui_app.load_image_directory_button = Mock()
+    gui_app.cli_usage = True
 
     with (
         patch("labeler.views.gui.filedialog.askdirectory", return_value="test_dir") as mock_askdirectory,
@@ -304,7 +305,6 @@ def test_load_directory(gui_app):
         assert gui_app.images_in_dir == ["image1.png", "image2.jpg"]
         gui_app.show_buttons.assert_called_once()
         gui_app.next_img.assert_called_once()
-        gui_app.load_image_directory_button.configure.assert_called_once_with(state="disabled")
 
 
 def test_jump_to_image(gui_app):

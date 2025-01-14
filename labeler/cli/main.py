@@ -10,7 +10,7 @@ def main():
     """
     Main entry point for the labeler CLI.
     """
-    gui = GUI()
+    gui = GUI(cli=True)
     gui.start_gui()
 
 
