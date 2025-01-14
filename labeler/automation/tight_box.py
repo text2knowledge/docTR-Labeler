@@ -58,7 +58,7 @@ class TightBox:
                 center, size, angle = min_area_rect
                 w, h = size
 
-                if w < 5 or h < 5:
+                if w < 2 or h < 2:
                     continue  # Skip polygons with too small areas
 
                 # Expand by 2 pixels

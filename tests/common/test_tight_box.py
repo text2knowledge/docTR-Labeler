@@ -71,7 +71,7 @@ def test_tight_box_skips_small_polygons(tight_box, mock_polygon):
         return_value=([np.array([[[10, 10]], [[20, 10]], [[20, 20]], [[10, 20]]], dtype=np.int32)], None)
     )
     # Mock for a small polygon, below the threshold
-    cv2.minAreaRect = Mock(return_value=((15, 15), (4, 4), 0))  # Width and height less than 5
+    cv2.minAreaRect = Mock(return_value=((15, 15), (1.5, 1.5), 0))  # Width and height less than 2
 
     tight_box.tight_box()
 
