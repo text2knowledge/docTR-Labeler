@@ -109,18 +109,6 @@ class ImageOnCanvas:
         """
         return self.polygons, self.drawing_polygon
 
-    def resize(self):
-        """
-        Resize the image on the canvas
-        """
-        self.canvas.update()
-        max_w, max_h = self.canvas.winfo_width(), self.canvas.winfo_height()
-        self.canvas.configure(
-            scrollregion=(0, 0, max_w, max_h), yscrollcommand=self.root.vbar.set, xscrollcommand=self.root.hbar.set
-        )
-        self.imagetk = ImageTk.PhotoImage(self.img)
-        self.scale_factor = self.img.size[0] / self.img_width
-
     def auto_annotate(self):
         """
         Auto annotate the image
