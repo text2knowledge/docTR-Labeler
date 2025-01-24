@@ -39,7 +39,7 @@ class ImageOnCanvas:
 
         self.canvas.update()
         self.imagetk = ImageTk.PhotoImage(self.img)
-        self.scale_factor = self.img.size[0] / self.img_width
+        self.scale_factor = round(self.img.size[0] / self.img_width, 1)
 
         self.canvas_img = self.canvas.create_image(0, 0, anchor="nw", image=self.imagetk)
         canvas.config(scrollregion=canvas.bbox("all"))
@@ -65,12 +65,12 @@ class ImageOnCanvas:
         # Zoom in
         if event.keysym in ["plus", "equal", "KP_Add"]:  # type: ignore[union-attr]
             if self.scale_factor < max_zoom:
-                self.scale_factor += zoom_step
+                self.scale_factor = round(self.scale_factor + zoom_step, 1)
 
         # Zoom out
         elif event.keysym in ["minus", "KP_Subtract"]:  # type: ignore[union-attr]
             if self.scale_factor > min_zoom:
-                self.scale_factor -= zoom_step
+                self.scale_factor = round(self.scale_factor - zoom_step, 1)
 
         if self.scale_factor != previous_scale_factor:
             self.apply_zoom()
