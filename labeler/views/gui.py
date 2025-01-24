@@ -61,6 +61,8 @@ class GUI(tk.Tk):
         self.bind("<Control-r>", self.discard_tight)
         self.bind("<Control-s>", self.saver)
         self.bind("<Control-d>", self.delete_selected)
+        self.bind("<Control-f>", self.draw_poly_func)
+        self.bind("<Control-c>", self.discard_drawing)
 
         self.image_name: str | None = None
         self.image_dir: str | None = self.image_folder
@@ -570,7 +572,7 @@ class GUI(tk.Tk):
         logger.info(f"Annotations saved to {saving_path}")
         self.img_cnv.current_saved = True  # type: ignore[union-attr]
 
-    def draw_poly_func(self):
+    def draw_poly_func(self, event: tk.Event | None = None):
         """
         Draw a polygon on the canvas
         """
@@ -618,7 +620,7 @@ class GUI(tk.Tk):
         self.img_cnv.current_saved = False  # type: ignore[union-attr]
         self.save_image_button.configure(state="normal")
 
-    def discard_drawing(self):
+    def discard_drawing(self, event: tk.Event | None = None):
         """
         Discard the drawing of the polygon
         """
@@ -653,10 +655,21 @@ class GUI(tk.Tk):
                 self.auto_annotate_button.configure(state="disabled")
 
             # Start the background task in a separate thread
-            threading.Thread(target=_background_task, daemon=True).start()
+            background_thread = threading.Thread(target=_background_task, daemon=True)
+            background_thread.start()
+
+            # Periodically check if the thread is done
+            def check_thread():
+                if not background_thread.is_alive():
+                    self.deselect_all()  # Deselect all polygons after the thread finishes
+                else:
+                    self.after(100, check_thread)  # Check again after 100 ms
+
+            self.after(100, check_thread)
         else:
             self.tight_box_obj = TightBox(self, self.img_cnv, self.threshold_scale.get())
             self.tight_box_obj.tight_box()
+            self.deselect_all()
 
         self.save_image_button.configure(state="normal")
 

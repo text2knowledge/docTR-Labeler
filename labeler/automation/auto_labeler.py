@@ -3,10 +3,10 @@
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
 
+import cv2
 import numpy as np
 from onnxtr.io import DocumentFile
 from onnxtr.models import from_hub, ocr_predictor
-from onnxtr.utils import extract_rcrops
 
 __all__ = ["AutoLabeler"]
 
@@ -80,10 +80,53 @@ class AutoLabeler:
 
         return {"polygons": polygons, "texts": texts}
 
+    def _extract_as_straight_box(self, image: np.ndarray, coords: list[list[int]]) -> np.ndarray:
+        """
+        Extract a 4-point polygon from the image and warp it into a straight rectangular crop.
+
+        Args:
+            image (np.ndarray): The input image.
+            coords (list[list[int]]): List of 4 points [[x1, y1], [x2, y2], [x3, y3], [x4, y4]].
+
+
+        Returns:
+            np.ndarray: The straightened rectangular crop.
+        """
+        src_points = np.array(coords, dtype="float32")
+
+        # Determine the bounding box dimensions (width and height of the rectangle)
+        width = max(  # type: ignore[call-overload]
+            np.linalg.norm(src_points[0] - src_points[1]),
+            np.linalg.norm(src_points[2] - src_points[3]),
+        )
+        height = max(  # type: ignore[call-overload]
+            np.linalg.norm(src_points[0] - src_points[3]),
+            np.linalg.norm(src_points[1] - src_points[2]),
+        )
+
+        # Define the destination points for the rectangle
+        dst_points = np.array([[0, 0], [width - 1, 0], [width - 1, height - 1], [0, height - 1]], dtype="float32")
+
+        # Compute the perspective transform matrix & warp the image
+        transform_matrix = cv2.getPerspectiveTransform(src_points, dst_points)
+        return cv2.warpPerspective(image, transform_matrix, (int(width), int(height)))
+
     def predict_label(self, image_path: str, coords: list[list[int]]) -> str:
+        """
+        Predict text from an image and return the text for the given coordinates.
+
+        Args:
+            image_path: str: Path to the image
+            coords: list[list[int]]: List of 4 points [[x1, y1], [x2, y2], [x3, y3], [x4, y4]]
+
+        Returns:
+            str: The predicted text
+        """
         doc = DocumentFile.from_images(image_path)
-        # convert coords to numpy array and add batch dimension
-        np_coords = np.array([coords])
-        crop = extract_rcrops(doc[0], np_coords)
-        res = self.predictor.reco_predictor(crop)
+        try:
+            crop = self._extract_as_straight_box(doc[0], coords)
+        except Exception:
+            # Return empty string if the crop is not valid
+            return ""
+        res = self.predictor.reco_predictor([crop])
         return res[0][0].strip()
