@@ -414,7 +414,7 @@ class GUI(tk.Tk):
             Helper method to filter supported images from a directory.
             """
             try:
-                file_names = os.listdir(directory)
+                file_names = sorted(os.listdir(directory))
                 return [name for name in file_names if name.split(".")[-1].lower() in self.supported_formats]
             except Exception as e:
                 self.pop_up(f"Error reading the directory: {e}")

@@ -6,7 +6,7 @@
 ![Build Status](https://github.com/text2knowledge/docTR-Labeler/workflows/builds/badge.svg)
 [![codecov](https://codecov.io/gh/text2knowledge/docTR-Labeler/graph/badge.svg?token=vrRnHbweMg)](https://codecov.io/gh/text2knowledge/docTR-Labeler)
 [![CodeFactor](https://www.codefactor.io/repository/github/text2knowledge/doctr-labeler/badge)](https://www.codefactor.io/repository/github/text2knowledge/doctr-labeler)
-[![Pypi](https://img.shields.io/badge/pypi-v0.1.2-blue.svg)](https://pypi.org/project/docTR-Labeler/)
+[![Pypi](https://img.shields.io/badge/pypi-v0.1.3-blue.svg)](https://pypi.org/project/docTR-Labeler/)
 
 docTR Labeler is a tool to label OCR data for the [docTR](https://github.com/mindee/doctr) and [OnnxTR](https://github.com/felixdittrich92/OnnxTR) projects.
 
