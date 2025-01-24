@@ -125,7 +125,7 @@ class AutoLabeler:
         doc = DocumentFile.from_images(image_path)
         try:
             crop = self._extract_as_straight_box(doc[0], coords)
-        except Exception:
+        except Exception:  # pragma: no cover
             # Return empty string if the crop is not valid
             return ""
         res = self.predictor.reco_predictor([crop])

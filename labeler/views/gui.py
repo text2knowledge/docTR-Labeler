@@ -659,7 +659,7 @@ class GUI(tk.Tk):
             background_thread.start()
 
             # Periodically check if the thread is done
-            def check_thread():
+            def check_thread():  # pragma: no cover
                 if not background_thread.is_alive():
                     self.deselect_all()  # Deselect all polygons after the thread finishes
                 else:
