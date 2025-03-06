@@ -49,7 +49,9 @@ def test_save_json(image_on_canvas):
         json_path = image_on_canvas.save_json()
         assert json_path == os.path.join(image_on_canvas.tmp_labels_path, "mock_payslip.json")
         mock_makedirs.assert_called_once_with(image_on_canvas.tmp_labels_path)
-        mock_open.assert_any_call(os.path.join(image_on_canvas.tmp_labels_path, "mock_payslip.json"), "w")
+        mock_open.assert_any_call(
+            os.path.join(image_on_canvas.tmp_labels_path, "mock_payslip.json"), "w", encoding="utf-8"
+        )
 
 
 def test_auto_annotate(image_on_canvas):

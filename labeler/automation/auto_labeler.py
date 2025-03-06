@@ -3,6 +3,8 @@
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
 
+import os
+
 import cv2
 import numpy as np
 from onnxtr.io import DocumentFile
@@ -18,8 +20,8 @@ class AutoLabeler:
 
     def __init__(self):
         self.predictor = ocr_predictor(
-            det_arch="fast_base",
-            reco_arch=from_hub("Felix92/onnxtr-parseq-multilingual-v1"),
+            det_arch=self._load_arch(os.environ.get("DETECTION_ARCH", "fast_base")),
+            reco_arch=self._load_arch(os.environ.get("RECOGNITION_ARCH", "Felix92/onnxtr-parseq-multilingual-v1")),
             det_bs=1,
             reco_bs=256,
             assume_straight_pages=False,
@@ -32,6 +34,13 @@ class AutoLabeler:
             disable_crop_orientation=True,
             disable_page_orientation=True,
         )
+
+    def _load_arch(self, arch: str) -> str:
+        # For HF hub models
+        if arch.count("/") == 1:
+            return from_hub(arch)
+        # Otherwise OnnxTR downloaded models or local OnnxTR
+        return arch
 
     def _to_absolute(self, geom: tuple[tuple[float, float]], img_shape: tuple[int, int]) -> list[list[int]]:
         """
@@ -74,7 +83,7 @@ class AutoLabeler:
             for block in page["blocks"]:
                 for line in block["lines"]:
                     for word in line["words"]:
-                        if word["objectness_score"] > 0.8:
+                        if word["objectness_score"] > float(os.environ.get("OBJECTNESS_THRESHOLD", 0.5)):
                             polygons.append(self._to_absolute(word["geometry"], shape))
                             texts.append(word["value"])
 
