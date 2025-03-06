@@ -160,7 +160,7 @@ class ImageOnCanvas:
 
             if os.path.exists(temp_annotation_file):
                 try:
-                    with open(temp_annotation_file, "r") as temp_file:
+                    with open(temp_annotation_file, "r", encoding="utf-8") as temp_file:
                         temp_annotations = json.load(temp_file)
                     logger.info(f"Loaded temporary annotations for {img_name}")
                 except Exception as e:
@@ -169,7 +169,7 @@ class ImageOnCanvas:
         # If no temp annotations found, load from pre_annotations.json
         if not temp_annotations and os.path.exists(self.pre_annotations_json_path):
             try:
-                with open(self.pre_annotations_json_path, "r") as pre_file:
+                with open(self.pre_annotations_json_path, "r", encoding="utf-8") as pre_file:
                     pre_annotations = json.load(pre_file)
                 logger.info(f"Loaded pre-annotations from {self.pre_annotations_json_path}")
             except Exception as e:
@@ -237,7 +237,7 @@ class ImageOnCanvas:
 
             json_file_path = os.path.join(self.tmp_labels_path, img_name.split(".")[0] + ".json")
             try:
-                with open(json_file_path, "w") as fl:
+                with open(json_file_path, "w", encoding="utf-8") as fl:
                     json.dump(data, fl, indent=4, ensure_ascii=False)
                 logger.info(f"Successfully saved JSON to {json_file_path}")
             except Exception as e:  # pragma: no cover
@@ -252,12 +252,12 @@ class ImageOnCanvas:
         """
         data = {}
         for fl in os.listdir(self.tmp_labels_path):
-            with open(os.path.join(self.tmp_labels_path, fl), "r") as fl:  # type: ignore[assignment]
+            with open(os.path.join(self.tmp_labels_path, fl), "r", encoding="utf-8") as fl:  # type: ignore[assignment]
                 tmp_annotation = json.load(fl)  # type: ignore[arg-type]
                 # update only if polygons are present
                 if tmp_annotation[list(tmp_annotation.keys())[0]].get("polygons"):
                     data.update(tmp_annotation)
-        with open(os.path.join(self.root_path, "labels.json"), "w") as fl:  # type: ignore[assignment]
+        with open(os.path.join(self.root_path, "labels.json"), "w", encoding="utf-8") as fl:  # type: ignore[assignment]
             json.dump(data, fl, indent=4, ensure_ascii=False)  # type: ignore[arg-type]
         logger.info(f"Finally saved to {os.path.join(self.root_path, 'labels.json')}")
 

@@ -131,7 +131,7 @@ Description: {dataset_description}
             repo_type=repo_type,
         )
     # Add the readme
-    with open(os.path.join(dataset_path, "README.md"), "w") as f:
+    with open(os.path.join(dataset_path, "README.md"), "w", encoding="utf-8") as f:
         f.write(readme)
     api.upload_file(
         repo_id=repo_id,

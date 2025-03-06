@@ -52,6 +52,16 @@ pip3 install doctr-labeler
 - `Ctrl + +` : Zoom in (up to 150% by default) - Can be changed by setting a environment variable `DOCTR_LABELER_MAX_ZOOM` to a value between 1.1 and 2.0
 - `Ctrl + -` : Zoom out (down to 50% by default) - Can be changed by setting a environment variable `DOCTR_LABELER_MIN_ZOOM` to a value between 0.1 and 0.9
 
+## Configuration
+
+You can set the following environment variables to configure the tool:
+
+- `DOCTR_LABELER_MAX_ZOOM` : Maximum zoom level (default: 1.5)
+- `DOCTR_LABELER_MIN_ZOOM` : Minimum zoom level (default: 0.5)
+- `RECOGNITION_ARCH` : The recognition architecture to use (default: `Felix92/onnxtr-parseq-multilingual-v1`)
+- `DETECTION_ARCH` : The detector architecture to use (default: `fast_base`)
+- `OBJECTNESS_THRESHOLD` : The objectness threshold for the detector (default: 0.5)
+
 ## Usage CLI
 
 After installation you can use the CLI to start the tool:
