@@ -34,6 +34,7 @@ class AutoLabeler:
             disable_crop_orientation=True,
             disable_page_orientation=True,
         )
+        self.objectness_threshold = float(os.environ.get("OBJECTNESS_THRESHOLD", 0.5))
 
     def _load_arch(self, arch: str) -> str:
         # For HF hub models
@@ -83,7 +84,7 @@ class AutoLabeler:
             for block in page["blocks"]:
                 for line in block["lines"]:
                     for word in line["words"]:
-                        if word["objectness_score"] > float(os.environ.get("OBJECTNESS_THRESHOLD", 0.5)):
+                        if word["objectness_score"] > self.objectness_threshold:
                             polygons.append(self._to_absolute(word["geometry"], shape))
                             texts.append(word["value"])
 
