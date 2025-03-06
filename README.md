@@ -59,7 +59,7 @@ You can set the following environment variables to configure the tool:
 - `DOCTR_LABELER_MAX_ZOOM` : Maximum zoom level (default: 1.5)
 - `DOCTR_LABELER_MIN_ZOOM` : Minimum zoom level (default: 0.5)
 - `RECOGNITION_ARCH` : The recognition architecture to use (default: `Felix92/onnxtr-parseq-multilingual-v1`)
-- `DETECTOR_ARCH` : The detector architecture to use (default: `fast_base`)
+- `DETECTION_ARCH` : The detector architecture to use (default: `fast_base`)
 - `OBJECTNESS_THRESHOLD` : The objectness threshold for the detector (default: 0.5)
 
 ## Usage CLI
