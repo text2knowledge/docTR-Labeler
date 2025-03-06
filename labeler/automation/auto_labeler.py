@@ -10,6 +10,8 @@ import numpy as np
 from onnxtr.io import DocumentFile
 from onnxtr.models import from_hub, ocr_predictor
 
+from ..logger import logger
+
 __all__ = ["AutoLabeler"]
 
 
@@ -35,12 +37,15 @@ class AutoLabeler:
             disable_page_orientation=True,
         )
         self.objectness_threshold = float(os.environ.get("OBJECTNESS_THRESHOLD", 0.5))
+        logger.info(f"AutoLabeler objectness threshold set to: {self.objectness_threshold}")
 
     def _load_arch(self, arch: str) -> str:
         # For HF hub models
         if arch.count("/") == 1:
+            logger.info(f"Loading model from HF hub: {arch}")
             return from_hub(arch)
-        # Otherwise OnnxTR downloaded models or local OnnxTR
+        # Otherwise OnnxTR downloaded models
+        logger.info(f"Loading model from OnnxTR: {arch}")
         return arch
 
     def _to_absolute(self, geom: tuple[tuple[float, float]], img_shape: tuple[int, int]) -> list[list[int]]:
