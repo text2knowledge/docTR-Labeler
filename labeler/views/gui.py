@@ -192,9 +192,11 @@ class GUI(tk.Tk):
         self.type_variable = tk.StringVar(self.top_frame, self.type_options[0])
         # Listener for label type
         self.type_variable.trace_add("write", lambda *args: self.save_type())
-        self.label_type = ttk.OptionMenu(
-            self.top_frame, self.type_variable, self.type_variable.get(), *self.type_options
-        )
+        # self.label_type = ttk.OptionMenu(
+        #     self.top_frame, self.type_variable, self.type_variable.get(), *self.type_options
+        # )
+        self.label_type = ttk.Combobox(self.top_frame, textvariable=self.type_variable)
+        self.label_type["values"] = self.type_options
         self.progress_bar = ttk.Progressbar(self.top_frame, orient="horizontal", length=100, mode="determinate")
 
         # Canvas
@@ -566,6 +568,7 @@ class GUI(tk.Tk):
         """
         Save the annotations for the image
         """
+        self.deselect_all()
         logger.info(f"Saving annotations for {self.image_name}")
         self.save_image_button.configure(state="disabled")
         saving_path = self.img_cnv.save_json()  # type: ignore[union-attr]
