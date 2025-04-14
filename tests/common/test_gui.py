@@ -338,11 +338,11 @@ def test_delete_selected(gui_app):
     gui_app.save_image_button.configure.assert_called_once_with(state="normal")
 
 
-def test_saver(gui_app):
+def test_saver(gui_app, monkeypatch):
     gui_app.img_cnv = Mock()
     gui_app.img_cnv.save_json.return_value = "test_path"
     gui_app.save_image_button = Mock()
-
+    monkeypatch.setattr(gui_app, "deselect_all", lambda: None)
     with patch("labeler.views.gui.logger") as mock_logger:
         gui_app.saver()
 
