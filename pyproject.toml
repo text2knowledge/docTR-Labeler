@@ -105,6 +105,7 @@ module = [
     "darkdetect.*",
     "tqdm.*",
     "huggingface_hub.*",
+    "onnxruntime.*",
     "onnxtr.*",
 ]
 ignore_missing_imports = true
@@ -131,6 +132,8 @@ known-third-party = [
     "tkinter",
     "sv_ttk",
     "darkdetect",
+    "onnxruntime",
+    "onnxtr",
 ]
 
 [tool.ruff.lint.per-file-ignores]

@@ -192,8 +192,9 @@ class GUI(tk.Tk):
         self.type_variable = tk.StringVar(self.top_frame, self.type_options[0])
         # Listener for label type
         self.type_variable.trace_add("write", lambda *args: self.save_type())
-        self.label_type = ttk.Combobox(self.top_frame, textvariable=self.type_variable)
-        self.label_type["values"] = self.type_options
+        self.label_type = ttk.Combobox(
+            self.top_frame, textvariable=self.type_variable, values=self.type_options, state="readonly"
+        )
         self.progress_bar = ttk.Progressbar(self.top_frame, orient="horizontal", length=100, mode="determinate")
 
         # Canvas
@@ -350,13 +351,15 @@ class GUI(tk.Tk):
         if not self.img_cnv or not hasattr(self, "last_selected_polygon"):
             return
 
-        last_selected_polygon = next(
-            (poly for poly in self.img_cnv.polygons if poly.polygon_id == self.last_selected_polygon), None
-        )
-        if last_selected_polygon and last_selected_polygon.select_poly:
+        selected_polys = [poly for poly in self.img_cnv.polygons if poly.select_poly]
+        if selected_polys:
             with self.img_cnv.polygons_mutex:
                 new_type = self.type_variable.get().strip()
-                last_selected_polygon.poly_type = new_type
+                # skip if it's the default type
+                if new_type == self.type_options[0]:
+                    return
+                for poly in selected_polys:
+                    poly.poly_type = new_type
             self.img_cnv.current_saved = False
             self.save_image_button.configure(state="normal")
 

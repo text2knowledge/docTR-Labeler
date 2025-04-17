@@ -57,6 +57,12 @@ class ImageOnCanvas:
 
     def zoom(self, event: Event | None = None):
         """Handle zooming in and out."""
+        # NOTE: The zoom functionality is disabled while drawing a polygon
+        # because it can cause scale issues with the polygon points.
+        if self.drawing_polygon:
+            logger.info("Cannot zoom while drawing a polygon")
+            return
+
         zoom_step = 0.1  # Zoom step size
         max_zoom = min(float(os.environ.get("DOCTR_LABELER_MAX_ZOOM", 1.5)), 2.0)  # Maximum zoom capped at 2.0
         min_zoom = max(float(os.environ.get("DOCTR_LABELER_MIN_ZOOM", 0.5)), 0.1)  # Minimum zoom capped at 0.1
