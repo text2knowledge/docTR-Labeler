@@ -7,8 +7,11 @@ import os
 
 import cv2
 import numpy as np
+import onnxruntime as ort
 from onnxtr.io import DocumentFile
 from onnxtr.models import from_hub, ocr_predictor
+
+ort.set_default_logger_severity(os.getenv("ORT_LOG_SEVERITY_LEVEL", 4))
 
 from ..logger import logger
 
