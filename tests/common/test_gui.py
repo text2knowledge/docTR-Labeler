@@ -45,7 +45,7 @@ def test_show_buttons(gui_app):
     assert str(gui_app.draw_poly_button["state"]) == "normal"
     assert str(gui_app.make_tight_button["state"]) == "normal"
     assert str(gui_app.label_text["state"]) == "normal"
-    assert str(gui_app.label_type["state"]) == "normal"
+    assert str(gui_app.label_type["state"]) == "readonly"
 
 
 def test_toggle_keep_drawing(gui_app):
@@ -151,10 +151,10 @@ def test_show_buttons_enables_buttons(gui_app):
         gui_app.draw_poly_button,
         gui_app.make_tight_button,
         gui_app.label_text,
-        gui_app.label_type,
     ]
     for button in buttons:
         assert str(button["state"]) == "normal"
+    assert str(gui_app.label_type["state"]) == "readonly"
 
 
 def test_select_all(gui_app):

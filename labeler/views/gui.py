@@ -311,7 +311,7 @@ class GUI(tk.Tk):
         self.draw_poly_button.configure(state="normal")
         self.make_tight_button.configure(state="normal")
         self.label_text.configure(state="normal")
-        self.label_type.configure(state="normal")
+        self.label_type.configure(state="readonly")
 
     def select_all(self, event: tk.Event | None = None):
         """
