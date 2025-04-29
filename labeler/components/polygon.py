@@ -67,14 +67,14 @@ class Polygon:
             event: Event: The event object
         """
         self.inside_poly = True
-        if self.select_poly is False:
+        if self.select_poly is False and self.poly_type == self.root.type_options[0]:
             self.canvas.itemconfigure(CURRENT, stipple="gray25", fill="blue")
 
         # Set the label and type if a polygon is selected
         any_selected = any(hasattr(poly, "select_poly") and poly.select_poly for poly in self.root.img_cnv.polygons)
         if not any_selected:
             self.root.label_variable.set(self.text)
-            self.root.type_variable.set(self.poly_type)
+            self.root.show_case_type_variable.set(self.poly_type)
 
     def delete_self(self):
         """
@@ -93,12 +93,12 @@ class Polygon:
         """
         self.inside_poly = False
         self.down_inside_poly = False
-        if self.select_poly is False:
+        if self.select_poly is False and self.poly_type == self.root.type_options[0]:
             self.canvas.itemconfigure(CURRENT, stipple="", fill="")
         # Reset the label and type if no polygon is selected
         if not any(hasattr(poly, "select_poly") and poly.select_poly for poly in self.root.img_cnv.polygons):
             self.root.label_variable.set("")
-            self.root.type_variable.set(self.root.type_options[0])
+            self.root.show_case_type_variable.set(self.root.type_options[0])
 
     def down_poly(self, event: Event | None = None):
         """
@@ -110,8 +110,6 @@ class Polygon:
         self.down_inside_poly = True
         self.root.polygon_in_use = True
         self.root.last_selected_polygon = self.polygon_id
-        self.root.label_variable.set(self.text)
-        self.root.type_variable.set(self.poly_type)
 
     def chkup_poly(self, event: Event | None = None):
         """
@@ -122,11 +120,13 @@ class Polygon:
         """
         if self.down_inside_poly is True:
             if self.select_poly is False:
-                self.canvas.itemconfigure(CURRENT, fill="red", stipple="gray50")
+                if self.poly_type == self.root.type_options[0]:
+                    self.canvas.itemconfigure(CURRENT, fill="red", stipple="gray50")
                 self.select_poly = True
                 self.points_bigger()
             elif self.select_poly is True:
-                self.canvas.itemconfigure(CURRENT, fill="", stipple="")
+                if self.poly_type == self.root.type_options[0]:
+                    self.canvas.itemconfigure(CURRENT, fill="", stipple="")
                 self.select_poly = False
                 self.points_smaller()
                 self.canvas.tag_raise(self.polygon)
@@ -136,6 +136,15 @@ class Polygon:
     def _flatten(self):
         return [item for sublist in self.pt_coords for item in sublist]
 
+    def update_color(self, outline: str):
+        """
+        Update the color of the polygon.
+
+        Args:
+            outline (str): The color of the polygon outline.
+        """
+        self.canvas.itemconfigure(self.polygon, outline=outline, fill=outline, stipple="gray25")
+
     def initialize_points(self):
         """
         Initialize the points on the canvas - draw circular point widgets
@@ -143,7 +152,7 @@ class Polygon:
         for i in range(len(self.pt_coords)):
             if i < len(self.colors):
                 fill_color = self.colors[i]
-            else:
+            else:  # pragma: no cover
                 fill_color = "green"
             self.points.append(
                 self.canvas.create_oval(
@@ -164,7 +173,7 @@ class Polygon:
         """
         self.loc = 1
 
-    def leave(self, event: Event | None = None):
+    def leave(self, event: Event | None = None):  # pragma: no cover
         """
         Triggered when the cursor leaves the bound widget(A point in our case)
         """
@@ -257,10 +266,11 @@ class Polygon:
         """
         Deselect the current polygon
         """
-        if self.select_poly is False:
+        if self.select_poly is False:  # pragma: no cover
             pass
         else:
-            self.canvas.itemconfigure(self.polygon, fill="", stipple="")
+            if self.poly_type == self.root.type_options[0]:
+                self.canvas.itemconfigure(self.polygon, fill="", stipple="")
             self.select_poly = False
             self.down_inside_poly = False
             self.points_smaller()
@@ -269,9 +279,11 @@ class Polygon:
         """
         Select the current polygon
         """
-        if self.select_poly is True:
+        if self.select_poly is True:  # pragma: no cover
             pass
         else:
+            if self.poly_type == self.root.type_options[0]:
+                self.canvas.itemconfigure(self.polygon, fill="", stipple="")
             self.canvas.itemconfigure(self.polygon, fill="red", stipple="gray50")
             self.select_poly = True
             self.points_bigger()

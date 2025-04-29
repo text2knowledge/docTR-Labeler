@@ -1,3 +1,4 @@
+import logging
 import os
 from unittest.mock import MagicMock, patch
 
@@ -69,3 +70,52 @@ def test_auto_annotate(image_on_canvas):
 def test_add_polygon(image_on_canvas):
     image_on_canvas.add_poly([[10, 10], [20, 20]])
     assert len(image_on_canvas.polygons) == 1
+
+
+@patch("PIL.ImageTk.PhotoImage")  # Patch this to prevent error in zoom
+def test_zoom_behavior(mock_photoimage, image_on_canvas):
+    image_on_canvas.scale_factor = 1.0
+    os.environ["DOCTR_LABELER_MAX_ZOOM"] = "1.5"
+    os.environ["DOCTR_LABELER_MIN_ZOOM"] = "0.5"
+
+    # Simulate zoom in
+    image_on_canvas.zoom(MagicMock(keysym="plus"))
+
+    # Simulate zoom out
+    image_on_canvas.zoom(MagicMock(keysym="minus"))
+
+
+def test_auto_label_sets_text(image_on_canvas):
+    polygon = MagicMock(original_coords=[[0, 0], [10, 10]])
+    with patch("labeler.automation.auto_annotator.predict_label", return_value="predicted"):
+        image_on_canvas.auto_label(polygon)
+        assert polygon.text == "predicted"
+
+
+def test_save_json_empty_polygons_returns_message(image_on_canvas):
+    image_on_canvas.polygons = []
+    result = image_on_canvas.save_json()
+    assert result.startswith("--> Nothing to save")
+
+
+def test_update_types_updates_colors_and_logs(image_on_canvas, caplog):
+    image_on_canvas.root.type_options = ["default"]
+    image_on_canvas.root.color_palette = ["#000000"]
+    image_on_canvas.root._generate_color_palette = MagicMock(return_value=["#ff0000", "#00ff00"])
+    image_on_canvas.root.label_type = {"values": image_on_canvas.root.type_options}
+
+    polygon1 = MagicMock(poly_type="invoice")
+    polygon2 = MagicMock(poly_type="receipt")
+    polygon3 = MagicMock(poly_type="default")  # should be ignored for update_color
+    image_on_canvas.polygons = [polygon1, polygon2, polygon3]
+
+    with caplog.at_level(logging.WARNING):
+        image_on_canvas.update_types(["invoice", "receipt"])
+
+    assert "invoice" in image_on_canvas.root.type_options
+    assert "receipt" in image_on_canvas.root.type_options
+    assert len(image_on_canvas.root.color_palette) == 3
+
+    polygon1.update_color.assert_called_once()
+    polygon2.update_color.assert_called_once()
+    polygon3.update_color.assert_not_called()

@@ -3,7 +3,9 @@
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
 
+import colorsys
 import os
+import random
 import threading
 
 import darkdetect
@@ -35,6 +37,11 @@ class GUI(tk.Tk):
         self.cli_usage = kwargs.get("cli", False)
         # Set default type which should be "words"
         self.type_options = text_types if "words" in text_types else ["words"] + text_types
+
+        # Create fixed color palette for the type_options depending on the number of types
+        self.color_palette = self._generate_color_palette(len(self.type_options))
+        self.color_palette.insert(0, "#FF0000")  # Red for "words"
+
         kwargs.pop("text_types", None)
         kwargs.pop("image_folder", None)
         kwargs.pop("cli", None)
@@ -188,6 +195,17 @@ class GUI(tk.Tk):
         )
         self.label_text.insert("end", "")
 
+        # Show case label type
+        self.show_case_label_type_header = ttk.Label(self.top_frame, text="Choosen text type", width=self.button_width)
+        self.show_case_type_variable = tk.StringVar(self.top_frame, self.type_options[0])
+        self.show_case_label_type = ttk.Entry(
+            self.top_frame,
+            width=self.button_width,
+            font=("Arial", 8),
+            textvariable=self.show_case_type_variable,
+            state="readonly",
+        )
+
         self.label_type_header = ttk.Label(self.top_frame, text="Text type (optional)", width=self.button_width)
         self.type_variable = tk.StringVar(self.top_frame, self.type_options[0])
         # Listener for label type
@@ -245,8 +263,10 @@ class GUI(tk.Tk):
         self.label_text.grid(row=15, columnspan=2, column=0, padx=5, pady=10, sticky="we")
         self.label_type_header.grid(row=16, columnspan=2, padx=5, pady=10, sticky="we")
         self.label_type.grid(row=17, columnspan=2, padx=5, pady=10, sticky="we")
+        self.show_case_label_type_header.grid(row=18, columnspan=2, padx=5, pady=10, sticky="we")
+        self.show_case_label_type.grid(row=19, columnspan=2, padx=5, pady=10, sticky="we")
 
-        self.progress_bar.grid(row=19, columnspan=2, padx=5, pady=10, sticky="we")
+        self.progress_bar.grid(row=20, columnspan=2, padx=5, pady=10, sticky="we")
         # Hide the progress_bar by default
         self.progress_bar.grid_remove()
 
@@ -271,6 +291,24 @@ class GUI(tk.Tk):
         self.canvas.pack()
         self.hide_buttons()
         self.load_image_directory_button.configure(state="normal")
+
+    def _generate_color_palette(self, num_colors: int):
+        """
+        Generate a visually diverse color palette using spaced HSV values.
+        """
+        palette = []
+        golden_ratio_conjugate = 0.61803398875
+        h = random.random()
+
+        for _ in range(num_colors):
+            h = (h + golden_ratio_conjugate) % 1
+            s = 0.5 + random.random() * 0.5
+            v = 0.7 + random.random() * 0.3
+            r, g, b = colorsys.hsv_to_rgb(h, s, v)
+            hex_color = "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
+            palette.append(hex_color)
+
+        return palette
 
     def _validate_numeric_input(self, new_value: str) -> bool:
         """
@@ -355,11 +393,10 @@ class GUI(tk.Tk):
         if selected_polys:
             with self.img_cnv.polygons_mutex:
                 new_type = self.type_variable.get().strip()
-                # skip if it's the default type
-                if new_type == self.type_options[0]:
-                    return
                 for poly in selected_polys:
                     poly.poly_type = new_type
+                    self.show_case_type_variable.set(new_type)
+                    poly.update_color(self.color_palette[self.type_options.index(new_type)])
             self.img_cnv.current_saved = False
             self.save_image_button.configure(state="normal")
 
