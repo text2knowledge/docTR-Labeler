@@ -301,11 +301,9 @@ class ImageOnCanvas:
         """
         # Update colors for polygons with type annotations
         # Check that all poly_type values are in the type options otherwise log a warning
-        if set(poly_types) - set(self.root.type_options):
-            logger.warning(
-                f"Polygon types {set(poly_types) - set(self.root.type_options)} "
-                + f"not in type options {self.root.type_options}"
-            )
+        missing_types = set(poly_types) - set(self.root.type_options)
+        if missing_types:
+            logger.warning(f"Polygon types {missing_types} not in type options {self.root.type_options}")
         for polygon in self.polygons:
             if polygon.poly_type != self.root.type_options[0] and self.root.type_options:
                 polygon.update_color(self.root.color_palette[self.root.type_options.index(polygon.poly_type) - 1])

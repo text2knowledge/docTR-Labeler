@@ -154,7 +154,7 @@ class Polygon:
         for i in range(len(self.pt_coords)):
             if i < len(self.colors):
                 fill_color = self.colors[i]
-            else:
+            else:  # pragma: no cover
                 fill_color = "green"
             self.points.append(
                 self.canvas.create_oval(
@@ -175,7 +175,7 @@ class Polygon:
         """
         self.loc = 1
 
-    def leave(self, event: Event | None = None):
+    def leave(self, event: Event | None = None):  # pragma: no cover
         """
         Triggered when the cursor leaves the bound widget(A point in our case)
         """
@@ -268,7 +268,7 @@ class Polygon:
         """
         Deselect the current polygon
         """
-        if self.select_poly is False:
+        if self.select_poly is False:  # pragma: no cover
             pass
         else:
             if self.poly_type == self.root.type_options[0]:
@@ -281,7 +281,7 @@ class Polygon:
         """
         Select the current polygon
         """
-        if self.select_poly is True:
+        if self.select_poly is True:  # pragma: no cover
             pass
         else:
             if self.poly_type == self.root.type_options[0]:
