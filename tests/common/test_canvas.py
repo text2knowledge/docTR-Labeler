@@ -1,3 +1,4 @@
+import logging
 import os
 from unittest.mock import MagicMock, patch
 
@@ -95,3 +96,26 @@ def test_save_json_empty_polygons_returns_message(image_on_canvas):
     image_on_canvas.polygons = []
     result = image_on_canvas.save_json()
     assert result.startswith("--> Nothing to save")
+
+
+def test_update_types_updates_colors_and_logs(image_on_canvas, caplog):
+    image_on_canvas.root.type_options = ["default"]
+    image_on_canvas.root.color_palette = ["#000000"]
+    image_on_canvas.root._generate_color_palette = MagicMock(return_value=["#ff0000", "#00ff00"])
+    image_on_canvas.root.label_type = {"values": image_on_canvas.root.type_options}
+
+    polygon1 = MagicMock(poly_type="invoice")
+    polygon2 = MagicMock(poly_type="receipt")
+    polygon3 = MagicMock(poly_type="default")  # should be ignored for update_color
+    image_on_canvas.polygons = [polygon1, polygon2, polygon3]
+
+    with caplog.at_level(logging.WARNING):
+        image_on_canvas.update_types(["invoice", "receipt"])
+
+    assert "invoice" in image_on_canvas.root.type_options
+    assert "receipt" in image_on_canvas.root.type_options
+    assert len(image_on_canvas.root.color_palette) == 3
+
+    polygon1.update_color.assert_called_once()
+    polygon2.update_color.assert_called_once()
+    polygon3.update_color.assert_not_called()
