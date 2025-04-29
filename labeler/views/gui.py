@@ -5,6 +5,7 @@
 
 import colorsys
 import os
+import random
 import threading
 
 import darkdetect
@@ -38,12 +39,7 @@ class GUI(tk.Tk):
         self.type_options = text_types if "words" in text_types else ["words"] + text_types
 
         # Create fixed color palette for the type_options depending on the number of types
-        self.color_palette = [
-            "#{:02x}{:02x}{:02x}".format(*[
-                int(c * 255) for c in colorsys.hsv_to_rgb(i / len(self.type_options), 0.6, 0.9)
-            ])
-            for i in range(len(self.type_options) - 1)  # Exclude the default "words" type
-        ]
+        self.color_palette = self._generate_color_palette(len(self.type_options))
         self.color_palette.insert(0, "#FF0000")  # Red for "words"
 
         kwargs.pop("text_types", None)
@@ -200,7 +196,7 @@ class GUI(tk.Tk):
         self.label_text.insert("end", "")
 
         # Show case label type
-        self.show_case_label_type_header = ttk.Label(self.top_frame, text="Choosen text_type", width=self.button_width)
+        self.show_case_label_type_header = ttk.Label(self.top_frame, text="Choosen text type", width=self.button_width)
         self.show_case_type_variable = tk.StringVar(self.top_frame, self.type_options[0])
         self.show_case_label_type = ttk.Entry(
             self.top_frame,
@@ -295,6 +291,24 @@ class GUI(tk.Tk):
         self.canvas.pack()
         self.hide_buttons()
         self.load_image_directory_button.configure(state="normal")
+
+    def _generate_color_palette(self, num_colors: int):
+        """
+        Generate a visually diverse color palette using spaced HSV values.
+        """
+        palette = []
+        golden_ratio_conjugate = 0.61803398875
+        h = random.random()
+
+        for _ in range(num_colors):
+            h = (h + golden_ratio_conjugate) % 1
+            s = 0.5 + random.random() * 0.5
+            v = 0.7 + random.random() * 0.3
+            r, g, b = colorsys.hsv_to_rgb(h, s, v)
+            hex_color = "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
+            palette.append(hex_color)
+
+        return palette
 
     def _validate_numeric_input(self, new_value: str) -> bool:
         """
