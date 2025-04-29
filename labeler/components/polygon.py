@@ -74,7 +74,7 @@ class Polygon:
         any_selected = any(hasattr(poly, "select_poly") and poly.select_poly for poly in self.root.img_cnv.polygons)
         if not any_selected:
             self.root.label_variable.set(self.text)
-            self.root.type_variable.set(self.poly_type)
+            self.root.show_case_type_variable.set(self.poly_type)
 
     def delete_self(self):
         """
@@ -98,7 +98,7 @@ class Polygon:
         # Reset the label and type if no polygon is selected
         if not any(hasattr(poly, "select_poly") and poly.select_poly for poly in self.root.img_cnv.polygons):
             self.root.label_variable.set("")
-            self.root.type_variable.set(self.root.type_options[0])
+            self.root.show_case_type_variable.set(self.root.type_options[0])
 
     def down_poly(self, event: Event | None = None):
         """
@@ -110,8 +110,6 @@ class Polygon:
         self.down_inside_poly = True
         self.root.polygon_in_use = True
         self.root.last_selected_polygon = self.polygon_id
-        self.root.label_variable.set(self.text)
-        self.root.type_variable.set(self.poly_type)
 
     def chkup_poly(self, event: Event | None = None):
         """

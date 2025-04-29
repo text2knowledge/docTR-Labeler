@@ -13,6 +13,7 @@ def gui_app():
     root.type_options = ["option1", "option2", "option3"]
     root.label_variable = MagicMock()
     root.type_variable = MagicMock()
+    root.show_case_type_variable = MagicMock()
     root.img_cnv = MagicMock(ImageOnCanvas)
     root.img_cnv.polygons = [MagicMock(Polygon)]
     canvas = MagicMock(Canvas)
@@ -35,13 +36,13 @@ def test_leave_poly(gui_app):
     pts = [[10, 10], [20, 20], [30, 30]]
     poly = Polygon(root=root, canvas=canvas, pts=pts)
     root.label_variable = MagicMock()
-    root.type_variable = MagicMock()
+    root.show_case_type_variable = MagicMock()
 
     poly.leave_poly()
 
     canvas.itemconfigure.assert_called_with(CURRENT, stipple="", fill="")
     root.label_variable.set.assert_called_with("")
-    root.type_variable.set.assert_called_with(root.type_options[0])
+    root.show_case_type_variable.set.assert_called_with(root.type_options[0])
 
 
 def test_draw_points(gui_app):
@@ -62,14 +63,14 @@ def test_enter_poly(gui_app):
     poly = Polygon(root=root, canvas=canvas, pts=pts)
 
     root.label_variable = MagicMock()
-    root.type_variable = MagicMock()
+    root.show_case_type_variable = MagicMock()
 
     poly.enter_poly()
 
     # Verify that the polygon's color changed and that the label and type were set
     canvas.itemconfigure.assert_called_with(CURRENT, stipple="gray25", fill="blue")
     root.label_variable.set.assert_called_with(poly.text)
-    root.type_variable.set.assert_called_with(poly.poly_type)
+    root.show_case_type_variable.set.assert_called_with(poly.poly_type)
 
 
 def test_chkup(gui_app):

@@ -44,6 +44,7 @@ class GUI(tk.Tk):
             ])
             for i in range(len(self.type_options) - 1)  # Exclude the default "words" type
         ]
+        self.color_palette.insert(0, "#FF0000")  # Red for "words"
 
         kwargs.pop("text_types", None)
         kwargs.pop("image_folder", None)
@@ -198,6 +199,17 @@ class GUI(tk.Tk):
         )
         self.label_text.insert("end", "")
 
+        # Show case label type
+        self.show_case_label_type_header = ttk.Label(self.top_frame, text="Choosen text_type", width=self.button_width)
+        self.show_case_type_variable = tk.StringVar(self.top_frame, self.type_options[0])
+        self.show_case_label_type = ttk.Entry(
+            self.top_frame,
+            width=self.button_width,
+            font=("Arial", 8),
+            textvariable=self.show_case_type_variable,
+            state="readonly",
+        )
+
         self.label_type_header = ttk.Label(self.top_frame, text="Text type (optional)", width=self.button_width)
         self.type_variable = tk.StringVar(self.top_frame, self.type_options[0])
         # Listener for label type
@@ -255,8 +267,10 @@ class GUI(tk.Tk):
         self.label_text.grid(row=15, columnspan=2, column=0, padx=5, pady=10, sticky="we")
         self.label_type_header.grid(row=16, columnspan=2, padx=5, pady=10, sticky="we")
         self.label_type.grid(row=17, columnspan=2, padx=5, pady=10, sticky="we")
+        self.show_case_label_type_header.grid(row=18, columnspan=2, padx=5, pady=10, sticky="we")
+        self.show_case_label_type.grid(row=19, columnspan=2, padx=5, pady=10, sticky="we")
 
-        self.progress_bar.grid(row=19, columnspan=2, padx=5, pady=10, sticky="we")
+        self.progress_bar.grid(row=20, columnspan=2, padx=5, pady=10, sticky="we")
         # Hide the progress_bar by default
         self.progress_bar.grid_remove()
 
@@ -365,16 +379,10 @@ class GUI(tk.Tk):
         if selected_polys:
             with self.img_cnv.polygons_mutex:
                 new_type = self.type_variable.get().strip()
-                # skip if it's the default type
-                # TODO: Verify that this does not raise other issues
-                # if new_type == self.type_options[0]:
-                #    return
-                # TODO: Currently if we annotate two boxes different ->
-                # TODO: and select each other the sec one is overwritten with the first one -> how to avoid that case?
                 for poly in selected_polys:
                     poly.poly_type = new_type
-                    if new_type != self.type_options[0]:
-                        poly.update_color(self.color_palette[self.type_options.index(new_type) - 1])
+                    self.show_case_type_variable.set(new_type)
+                    poly.update_color(self.color_palette[self.type_options.index(new_type)])
             self.img_cnv.current_saved = False
             self.save_image_button.configure(state="normal")
 
