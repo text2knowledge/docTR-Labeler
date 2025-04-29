@@ -67,7 +67,7 @@ class Polygon:
             event: Event: The event object
         """
         self.inside_poly = True
-        if self.select_poly is False:
+        if self.select_poly is False and self.poly_type == self.root.type_options[0]:
             self.canvas.itemconfigure(CURRENT, stipple="gray25", fill="blue")
 
         # Set the label and type if a polygon is selected
@@ -93,7 +93,7 @@ class Polygon:
         """
         self.inside_poly = False
         self.down_inside_poly = False
-        if self.select_poly is False:
+        if self.select_poly is False and self.poly_type == self.root.type_options[0]:
             self.canvas.itemconfigure(CURRENT, stipple="", fill="")
         # Reset the label and type if no polygon is selected
         if not any(hasattr(poly, "select_poly") and poly.select_poly for poly in self.root.img_cnv.polygons):
@@ -122,11 +122,13 @@ class Polygon:
         """
         if self.down_inside_poly is True:
             if self.select_poly is False:
-                self.canvas.itemconfigure(CURRENT, fill="red", stipple="gray50")
+                if self.poly_type == self.root.type_options[0]:
+                    self.canvas.itemconfigure(CURRENT, fill="red", stipple="gray50")
                 self.select_poly = True
                 self.points_bigger()
             elif self.select_poly is True:
-                self.canvas.itemconfigure(CURRENT, fill="", stipple="")
+                if self.poly_type == self.root.type_options[0]:
+                    self.canvas.itemconfigure(CURRENT, fill="", stipple="")
                 self.select_poly = False
                 self.points_smaller()
                 self.canvas.tag_raise(self.polygon)
@@ -135,6 +137,15 @@ class Polygon:
 
     def _flatten(self):
         return [item for sublist in self.pt_coords for item in sublist]
+
+    def update_color(self, outline: str):
+        """
+        Update the color of the polygon.
+
+        Args:
+            outline (str): The color of the polygon outline.
+        """
+        self.canvas.itemconfigure(self.polygon, outline=outline, fill=outline, stipple="gray25")
 
     def initialize_points(self):
         """
@@ -260,7 +271,8 @@ class Polygon:
         if self.select_poly is False:
             pass
         else:
-            self.canvas.itemconfigure(self.polygon, fill="", stipple="")
+            if self.poly_type == self.root.type_options[0]:
+                self.canvas.itemconfigure(self.polygon, fill="", stipple="")
             self.select_poly = False
             self.down_inside_poly = False
             self.points_smaller()
@@ -272,6 +284,8 @@ class Polygon:
         if self.select_poly is True:
             pass
         else:
+            if self.poly_type == self.root.type_options[0]:
+                self.canvas.itemconfigure(self.polygon, fill="", stipple="")
             self.canvas.itemconfigure(self.polygon, fill="red", stipple="gray50")
             self.select_poly = True
             self.points_bigger()

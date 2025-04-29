@@ -3,6 +3,7 @@
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
 
+import colorsys
 import os
 import threading
 
@@ -35,6 +36,15 @@ class GUI(tk.Tk):
         self.cli_usage = kwargs.get("cli", False)
         # Set default type which should be "words"
         self.type_options = text_types if "words" in text_types else ["words"] + text_types
+
+        # Create fixed color palette for the type_options depending on the number of types
+        self.color_palette = [
+            "#{:02x}{:02x}{:02x}".format(*[
+                int(c * 255) for c in colorsys.hsv_to_rgb(i / len(self.type_options), 0.6, 0.9)
+            ])
+            for i in range(len(self.type_options) - 1)  # Exclude the default "words" type
+        ]
+
         kwargs.pop("text_types", None)
         kwargs.pop("image_folder", None)
         kwargs.pop("cli", None)
@@ -356,10 +366,15 @@ class GUI(tk.Tk):
             with self.img_cnv.polygons_mutex:
                 new_type = self.type_variable.get().strip()
                 # skip if it's the default type
-                if new_type == self.type_options[0]:
-                    return
+                # TODO: Verify that this does not raise other issues
+                # if new_type == self.type_options[0]:
+                #    return
+                # TODO: Currently if we annotate two boxes different ->
+                # TODO: and select each other the sec one is overwritten with the first one -> how to avoid that case?
                 for poly in selected_polys:
                     poly.poly_type = new_type
+                    if new_type != self.type_options[0]:
+                        poly.update_color(self.color_palette[self.type_options.index(new_type) - 1])
             self.img_cnv.current_saved = False
             self.save_image_button.configure(state="normal")
 
