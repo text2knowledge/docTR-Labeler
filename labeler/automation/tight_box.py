@@ -48,7 +48,7 @@ class TightBox:
 
                     cnts = np.array(original_pts).reshape((-1, 1, 2)).astype(np.int32)
                     img = cv2.imread(self.cnv.image_path)
-                    img = cv2.resize(img, self.cnv.img.size, interpolation=cv2.INTER_AREA)
+                    img = cv2.resize(img, self.cnv.img.size, interpolation=cv2.INTER_AREA)  # type: ignore[arg-type]
                     mask = np.zeros(img.shape[:2], np.uint8)
                     cv2.fillPoly(mask, pts=[cnts], color=(255, 255, 255))
                     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

@@ -233,7 +233,7 @@ class Polygon:
         """
         Triggered by a mouse click on a point
         """
-        self.point_in_use = event.widget
+        self.point_in_use = event.widget  # type: ignore[assignment]
         event.widget.bind("<B1-Motion>", self.motion)
 
     def motion(self, event: Event):
@@ -244,7 +244,7 @@ class Polygon:
             event: Event: The event object
         """
         self.root.config(cursor="crosshair")
-        self.point_in_use = event.widget
+        self.point_in_use = event.widget  # type: ignore[assignment]
         pt = self.canvas.find_withtag("current")[0]
         self.update_point(
             pt,
