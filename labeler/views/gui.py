@@ -726,7 +726,8 @@ class GUI(tk.Tk):
             pass
 
     def start_gui(self):  # pragma: no cover
-        sv_ttk.set_theme(darkdetect.theme())
+        if theme := darkdetect.theme():
+            sv_ttk.set_theme(theme)
         if self.image_folder:
             self.load_directory()
         self.mainloop()

@@ -113,11 +113,11 @@ class AutoLabeler:
         src_points = np.array(coords, dtype="float32")
 
         # Determine the bounding box dimensions (width and height of the rectangle)
-        width = max(  # type: ignore[call-overload]
+        width = max(
             np.linalg.norm(src_points[0] - src_points[1]),
             np.linalg.norm(src_points[2] - src_points[3]),
         )
-        height = max(  # type: ignore[call-overload]
+        height = max(
             np.linalg.norm(src_points[0] - src_points[3]),
             np.linalg.norm(src_points[1] - src_points[2]),
         )
