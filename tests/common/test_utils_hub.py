@@ -11,11 +11,14 @@ def test_valid_dataset_path():
     images_folder_name = "images"
 
     with patch("os.path.exists") as mock_exists:
-        mock_exists.side_effect = lambda path: path in [
-            dataset_path,
-            os.path.join(dataset_path, images_folder_name),
-            os.path.join(dataset_path, "labels.json"),
-        ]
+        mock_exists.side_effect = lambda path: (
+            path
+            in [
+                dataset_path,
+                os.path.join(dataset_path, images_folder_name),
+                os.path.join(dataset_path, "labels.json"),
+            ]
+        )
 
         # Should not raise any exception
         _check_dataset_path(dataset_path, images_folder_name)
@@ -35,10 +38,13 @@ def test_images_folder_missing():
     images_folder_name = "images"
 
     with patch("os.path.exists") as mock_exists:
-        mock_exists.side_effect = lambda path: path in [
-            dataset_path,
-            os.path.join(dataset_path, "labels.json"),
-        ]
+        mock_exists.side_effect = lambda path: (
+            path
+            in [
+                dataset_path,
+                os.path.join(dataset_path, "labels.json"),
+            ]
+        )
 
         with pytest.raises(FileNotFoundError, match=f"Dataset path {dataset_path} does not contain an 'images' folder"):
             _check_dataset_path(dataset_path, images_folder_name)
@@ -49,10 +55,13 @@ def test_labels_and_tmp_annotations_missing():
     images_folder_name = "images"
 
     with patch("os.path.exists") as mock_exists:
-        mock_exists.side_effect = lambda path: path in [
-            dataset_path,
-            os.path.join(dataset_path, images_folder_name),
-        ]
+        mock_exists.side_effect = lambda path: (
+            path
+            in [
+                dataset_path,
+                os.path.join(dataset_path, images_folder_name),
+            ]
+        )
 
         with pytest.raises(
             FileNotFoundError,

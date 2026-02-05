@@ -33,7 +33,7 @@ dependencies = [
     "opencv-python>=4.5.0, <5.0.0",
     "Pillow>=9.2.0",
     "tqdm>=4.30.0",
-    "huggingface-hub>=0.23.0,<1.0.0",
+    "huggingface-hub>=0.23.0,<2.0.0",
     # GUI
     "sv-ttk>=2.6.0",
     "darkdetect>=0.8.0",

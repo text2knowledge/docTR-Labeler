@@ -1,4 +1,4 @@
-# Copyright (C) 2024-2025, Felix Dittrich | Ian List | Devarshi Aggarwal.
+# Copyright (C) 2024-2026, Felix Dittrich | Ian List | Devarshi Aggarwal.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -98,6 +98,29 @@ class AutoLabeler:
 
         return {"polygons": polygons, "texts": texts}
 
+    def _order_points_clockwise(self, pts: np.ndarray) -> np.ndarray:
+        """
+        Order points as: top-left, top-right, bottom-right, bottom-left
+
+        Args:
+            pts (np.ndarray): Array of points with shape (4, 2)
+
+        Returns:
+            np.ndarray: Ordered array of points with shape (4, 2)
+        """
+        rect = np.zeros((4, 2), dtype="float32")
+
+        # sum and diff of points
+        s = pts.sum(axis=1)
+        diff = np.diff(pts, axis=1)
+
+        rect[0] = pts[np.argmin(s)]  # top-left
+        rect[2] = pts[np.argmax(s)]  # bottom-right
+        rect[1] = pts[np.argmin(diff)]  # top-right
+        rect[3] = pts[np.argmax(diff)]  # bottom-left
+
+        return rect
+
     def _extract_as_straight_box(self, image: np.ndarray, coords: list[list[int]]) -> np.ndarray:
         """
         Extract a 4-point polygon from the image and warp it into a straight rectangular crop.
@@ -111,6 +134,7 @@ class AutoLabeler:
             np.ndarray: The straightened rectangular crop.
         """
         src_points = np.array(coords, dtype="float32")
+        src_points = self._order_points_clockwise(src_points)
 
         # Determine the bounding box dimensions (width and height of the rectangle)
         width = max(

@@ -1,4 +1,4 @@
-# Copyright (C) 2024-2025, Felix Dittrich | Ian List | Devarshi Aggarwal.
+# Copyright (C) 2024-2026, Felix Dittrich | Ian List | Devarshi Aggarwal.
 
 # This program is licensed under the Apache License 2.0.
 # See LICENSE or go to <https://opensource.org/licenses/Apache-2.0> for full license details.
@@ -8,13 +8,7 @@ import subprocess
 import textwrap
 from uuid import uuid4
 
-from huggingface_hub import (
-    HfApi,
-    RepoUrl,
-    get_token,
-    get_token_permission,
-    login,
-)
+from huggingface_hub import HfApi, get_token, login
 
 from ..logger import logger
 
@@ -24,9 +18,9 @@ __all__ = ["hf_upload_dataset"]
 def login_to_hub() -> None:  # pragma: no cover
     """Login to huggingface hub"""
     access_token = get_token()
-    if access_token is not None and get_token_permission(access_token):
+    if access_token is not None:
         logger.info("Huggingface Hub token found and valid")
-        login(token=access_token, write_permission=True)
+        login(token=access_token)
     else:
         login()
     # check if git lfs is installed
@@ -69,7 +63,7 @@ def hf_upload_dataset(  # pragma: no cover
     override: bool = False,
 ):
     """
-    Upload a dataset to the Huggingface hub
+    Upload a dataset to the Hugging Face Hub.
 
     Args:
         dataset_path: str: The path to the folder which contains the 'images' folder
@@ -77,67 +71,81 @@ def hf_upload_dataset(  # pragma: no cover
         images_folder_name: str: The name of the folder containing the images (default: 'images')
         dataset_name: str: The name for the Hub dataset
         dataset_description: str: The description of the dataset
-        dataset_tags: list[str]: The tags for the dataset
+        dataset_tags: list[str]: The tags for the dataset (default: ['ocr', 'document', 'labeling'])
         override: bool: Whether to override an existing dataset with the same name
     """
     _check_dataset_path(dataset_path, images_folder_name)
 
     login_to_hub()
 
-    # Default readme
-    tags = "\n".join(f"- {tag}" for tag in dataset_tags)
-    readme = textwrap.dedent(f"""
----
-tags:
-{tags}
-license: apache-2.0
----
+    # README
+    tags_block = "\n".join(f"- {tag}" for tag in dataset_tags)
+    readme = textwrap.dedent(
+        f"""
+        ---
+        tags:
+        {tags_block}
+        license: apache-2.0
+        ---
 
-<p align="center">
-<img src="https://github.com/felixdittrich92/docTR-Labeler/raw/main/docs/images/logo.jpg" width="40%">
-</p>
+        <p align="center">
+        <img src="https://github.com/felixdittrich92/docTR-Labeler/raw/main/docs/images/logo.jpg" width="40%">
+        </p>
 
-**This OCR dataset was created with:**
+        **This OCR dataset was created with:**
 
-https://github.com/felixdittrich92/docTR-Labeler
+        https://github.com/felixdittrich92/docTR-Labeler
 
-Description: {dataset_description}
-""")
+        Description: {dataset_description}
+        """
+    ).strip()
 
     api = HfApi()
-    url = api.create_repo(dataset_name, token=get_token(), exist_ok=override, repo_type="dataset")
-    repo_url = RepoUrl(url)
-    repo_id = repo_url.repo_id
-    repo_type = repo_url.repo_type
 
+    # Create or reuse dataset repo
+    repo_id = api.create_repo(
+        repo_id=dataset_name,
+        repo_type="dataset",
+        exist_ok=override,
+    )
+
+    # Upload images
     api.upload_folder(
         repo_id=repo_id,
+        repo_type="dataset",
         folder_path=os.path.join(dataset_path, images_folder_name),
         path_in_repo="images",
-        repo_type=repo_type,
-    )
-    if os.path.exists(os.path.join(dataset_path, "labels.json")):
-        api.upload_file(
-            repo_id=repo_id,
-            path_or_fileobj=os.path.join(dataset_path, "labels.json"),
-            path_in_repo="labels.json",
-            repo_type=repo_type,
-        )
-    if os.path.exists(os.path.join(dataset_path, "tmp_annotations")):
-        api.upload_folder(
-            repo_id=repo_id,
-            folder_path=os.path.join(dataset_path, "tmp_annotations"),
-            path_in_repo="tmp_annotations",
-            repo_type=repo_type,
-        )
-    # Add the readme
-    with open(os.path.join(dataset_path, "README.md"), "w", encoding="utf-8") as f:
-        f.write(readme)
-    api.upload_file(
-        repo_id=repo_id,
-        path_or_fileobj=os.path.join(dataset_path, "README.md"),
-        path_in_repo="README.md",
-        repo_type=repo_type,
     )
 
-    logger.info(f"Dataset uploaded to Huggingface Hub: {repo_id}")
+    # Upload annotations
+    labels_path = os.path.join(dataset_path, "labels.json")
+    if os.path.exists(labels_path):
+        api.upload_file(
+            repo_id=repo_id,
+            repo_type="dataset",
+            path_or_fileobj=labels_path,
+            path_in_repo="labels.json",
+        )
+
+    tmp_ann_path = os.path.join(dataset_path, "tmp_annotations")
+    if os.path.exists(tmp_ann_path):
+        api.upload_folder(
+            repo_id=repo_id,
+            repo_type="dataset",
+            folder_path=tmp_ann_path,
+            path_in_repo="tmp_annotations",
+        )
+
+    # Upload README
+    readme_path = os.path.join(dataset_path, "README.md")
+    with open(readme_path, "w", encoding="utf-8") as f:
+        f.write(readme)
+
+    api.upload_file(
+        repo_id=repo_id,
+        repo_type="dataset",
+        path_or_fileobj=readme_path,
+        path_in_repo="README.md",
+    )
+
+    logger.info(f"Dataset uploaded to Hugging Face Hub: {repo_id}")
