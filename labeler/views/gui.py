@@ -5,7 +5,6 @@
 
 import colorsys
 import os
-import random
 import threading
 
 import darkdetect
@@ -298,17 +297,40 @@ class GUI(tk.Tk):
         """
         palette = []
         golden_ratio_conjugate = 0.61803398875
-        h = random.random()
-
-        for _ in range(num_colors):
+        h = 0.1
+        for i in range(num_colors):
             h = (h + golden_ratio_conjugate) % 1
-            s = 0.5 + random.random() * 0.5
-            v = 0.7 + random.random() * 0.3
-            r, g, b = colorsys.hsv_to_rgb(h, s, v)
+            # use hue range 0.1 (orange) to 0.9 (pink) to avoid red
+            # formula: h_without_red = min + h * (max - min)
+            h_without_red = 0.1 + h * 0.75
+
+            if i % 2 == 0:
+                s, v = 0.85, 0.90
+            else:
+                s, v = 0.60, 0.95
+
+            r, g, b = colorsys.hsv_to_rgb(h_without_red, s, v)
             hex_color = "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
             palette.append(hex_color)
 
         return palette
+
+    def _update_color_palette(self, type_color_mapping: dict):
+        """
+        Update the color palette based on loaded type-color mapping.
+
+        Args:
+            type_color_mapping: Dictionary mapping type names to hex colors
+        """
+        for type_name in self.type_options:
+            if type_name in type_color_mapping:
+                type_idx = self.type_options.index(type_name)
+                self.color_palette[type_idx] = type_color_mapping[type_name]
+            else:
+                type_idx = self.type_options.index(type_name)
+                if type_idx >= len(self.color_palette):
+                    new_colors = self._generate_color_palette(1)
+                    self.color_palette.extend(new_colors)
 
     def _validate_numeric_input(self, new_value: str) -> bool:
         """
