@@ -203,7 +203,10 @@ class ImageOnCanvas:
                     type_idx = self.root.type_options.index(poly_type)
                     colors.append(self.root.color_palette[type_idx])
                 else:
-                    colors.append("#FF0000")
+                    logger.warning(
+                        f"Polygon type '{poly_type}' not found in type_options. Using gray as fallback color."
+                    )
+                    colors.append("#808080")
 
             self.draw_polys(polygons, types, labels, colors)
 
@@ -320,26 +323,6 @@ class ImageOnCanvas:
                 ]
 
         logger.info(f"Total Polygons drawn: {len(self.polygons)}")
-
-    def update_types(self, poly_types: list[str]):
-        """
-        Update the polygon type colors based on the selected type options.
-
-        Args:
-            poly_types: list[str]: List of polygon types
-        """
-        # Update colors for polygons with type annotations
-        # Check that all poly_type values are in the type options otherwise log a warning
-        missing_types = list(set(poly_types) - set(self.root.type_options))
-        if len(self.root.type_options) == 1:
-            self.root.type_options.extend(missing_types)
-            self.root.color_palette.extend(self.root._generate_color_palette(len(missing_types)))
-            self.root.label_type["values"] = self.root.type_options
-        if missing_types:
-            logger.warning(f"Polygon types {missing_types} not in type options {self.root.type_options}")
-        for polygon in self.polygons:
-            if polygon.poly_type != self.root.type_options[0] and polygon.poly_type in self.root.type_options:
-                polygon.update_color(self.root.color_palette[self.root.type_options.index(polygon.poly_type) - 1])
 
     def add_poly(self, pts: list[list[int]]):
         """

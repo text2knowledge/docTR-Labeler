@@ -310,18 +310,19 @@ class GUI(tk.Tk):
                 s, v = 0.60, 0.95
 
             r, g, b = colorsys.hsv_to_rgb(h_without_red, s, v)
-            hex_color = "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
+            hex_color = "#{:02X}{:02X}{:02X}".format(int(r * 255), int(g * 255), int(b * 255))
             palette.append(hex_color)
 
         return palette
 
-    def _update_color_palette(self, type_color_mapping: dict):
+    def _update_color_palette(self, type_color_mapping: dict[str, str]):
         """
         Update the color palette based on loaded type-color mapping.
 
         Args:
             type_color_mapping: Dictionary mapping type names to hex colors
         """
+        num_new_colors = 0
         for type_name in self.type_options:
             if type_name in type_color_mapping:
                 type_idx = self.type_options.index(type_name)
@@ -329,8 +330,9 @@ class GUI(tk.Tk):
             else:
                 type_idx = self.type_options.index(type_name)
                 if type_idx >= len(self.color_palette):
-                    new_colors = self._generate_color_palette(1)
-                    self.color_palette.extend(new_colors)
+                    num_new_colors += 1
+        new_colors = self._generate_color_palette(num_new_colors)
+        self.color_palette.extend(new_colors)
 
     def _validate_numeric_input(self, new_value: str) -> bool:
         """
