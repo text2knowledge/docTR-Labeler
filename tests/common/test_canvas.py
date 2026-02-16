@@ -119,10 +119,6 @@ def test_load_json_color_mapping(image_on_canvas, mock_annotation_data):
     image_on_canvas.image_path = "mock_image.jpg"
     image_on_canvas.root.type_options = ["words", "document_type", "invoice_id"]
     image_on_canvas.root.color_palette = ["#FF0000", "#00FF00", "#0000FF"]
-    # image_on_canvas.root.type_options = ["words", "header", "footer"]
-    # test_palette = ["#FF0000", "#00FF00", "#0000FF"]
-    # image_on_canvas.root.color_palette = test_palette
-    # mock_annotation_data["mock_image.jpg"]["colors"] = test_palette
     mock_annotation_data["mock_image.jpg"]["types"] = ["document_type", "invoice_id"]
     json_content = json.dumps(mock_annotation_data)
 
