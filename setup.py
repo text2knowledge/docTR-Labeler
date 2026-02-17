@@ -4,7 +4,7 @@ from pathlib import Path
 from setuptools import setup
 
 PKG_NAME = "doctr-labeler"
-VERSION = os.getenv("BUILD_VERSION", "0.2.2")
+VERSION = os.getenv("BUILD_VERSION", "0.2.3")
 
 
 if __name__ == "__main__":
