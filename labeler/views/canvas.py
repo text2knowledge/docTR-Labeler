@@ -192,9 +192,23 @@ class ImageOnCanvas:
             polygons = annotations.get("polygons", [])
             labels = annotations.get("labels", ["" for _ in polygons])
             types = annotations.get("types", [self.root.type_options[0]] * len(polygons))
+            type_color_mapping = annotations.get("type_color_mapping", {})
 
-            self.draw_polys(polygons, types, labels)
-            self.update_types(types)
+            if type_color_mapping:
+                self.root._update_color_palette(type_color_mapping)
+
+            colors = []
+            for poly_type in types:
+                if poly_type in self.root.type_options:
+                    type_idx = self.root.type_options.index(poly_type)
+                    colors.append(self.root.color_palette[type_idx])
+                else:
+                    logger.warning(
+                        f"Polygon type '{poly_type}' not found in type_options. Using gray as fallback color."
+                    )
+                    colors.append("#808080")
+
+            self.draw_polys(polygons, types, labels, colors)
 
             logger.info(f"Loaded {len(polygons)} polygons from annotations")
         self.drawing_polygon = False
@@ -232,6 +246,10 @@ class ImageOnCanvas:
                 logger.warning("Not saving JSON as no polygons are present")
                 return "--> Nothing to save, because no polygons are present"
 
+            type_color_mapping = {}
+            for type_name, color in zip(self.root.type_options, self.root.color_palette):
+                type_color_mapping[type_name] = color
+
             data = {
                 img_name: {
                     "img_dimensions": [self.img_height, self.img_width],
@@ -239,6 +257,7 @@ class ImageOnCanvas:
                     "polygons": filtered_polygons,
                     "labels": labels,
                     "types": types,
+                    "type_color_mapping": type_color_mapping,
                 }
             }
 
@@ -268,14 +287,21 @@ class ImageOnCanvas:
             json.dump(data, fl, indent=4, ensure_ascii=False)  # type: ignore[arg-type]
         logger.info(f"Finally saved to {os.path.join(self.root_path, 'labels.json')}")
 
-    def draw_polys(self, coords: list[list[list[int]]], poly_types: list[str], poly_texts: list[str]):
-        """ "
+    def draw_polys(
+        self,
+        coords: list[list[list[int]]],
+        poly_types: list[str],
+        poly_texts: list[str],
+        colors: list[str] | None = None,
+    ):
+        """
         Draw polygons on the canvas
 
         Args:
             coords: list[list[list[int]]]: List of polygons to draw
             poly_types: list[str]: List of polygon types
             poly_texts: list[str]: List of polygon texts
+            colors: list[str] | None: List of polygon colors (optional)
         """
         with self.polygons_mutex:
             # Scale coordinates and create polygons
@@ -284,6 +310,12 @@ class ImageOnCanvas:
                 Polygon(self.root, self.canvas, poly, poly_type, poly_text)
                 for poly, poly_type, poly_text in zip(scaled_coords, poly_types, poly_texts)
             )
+            if colors:
+                start_idx = len(self.polygons) - len(colors)
+                for i, color in enumerate(colors):
+                    polygon = self.polygons[start_idx + i]
+                    polygon.update_color(color)
+
             # Update also the original coordinates for accurate scaling to the original image size
             for polygon in self.polygons:
                 polygon.original_coords = [
@@ -291,26 +323,6 @@ class ImageOnCanvas:
                 ]
 
         logger.info(f"Total Polygons drawn: {len(self.polygons)}")
-
-    def update_types(self, poly_types: list[str]):
-        """
-        Update the polygon type colors based on the selected type options.
-
-        Args:
-            poly_types: list[str]: List of polygon types
-        """
-        # Update colors for polygons with type annotations
-        # Check that all poly_type values are in the type options otherwise log a warning
-        missing_types = list(set(poly_types) - set(self.root.type_options))
-        if len(self.root.type_options) == 1:
-            self.root.type_options.extend(missing_types)
-            self.root.color_palette.extend(self.root._generate_color_palette(len(missing_types)))
-            self.root.label_type["values"] = self.root.type_options
-        if missing_types:
-            logger.warning(f"Polygon types {missing_types} not in type options {self.root.type_options}")
-        for polygon in self.polygons:
-            if polygon.poly_type != self.root.type_options[0] and polygon.poly_type in self.root.type_options:
-                polygon.update_color(self.root.color_palette[self.root.type_options.index(polygon.poly_type) - 1])
 
     def add_poly(self, pts: list[list[int]]):
         """

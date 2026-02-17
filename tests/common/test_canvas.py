@@ -1,6 +1,6 @@
-import logging
+import json
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, mock_open, patch
 
 import pytest
 
@@ -39,9 +39,10 @@ def test_current_state(image_on_canvas):
 
 
 def test_save_json(image_on_canvas):
-    mock_polygon = MagicMock(pt_coords=[[0, 0], [10, 0], [10, 10], [0, 10]], text="label", poly_type="type")
+    mock_polygon = MagicMock(pt_coords=[[0, 0], [10, 0], [10, 10], [0, 10]], text="label", poly_type="words")
     image_on_canvas.polygons = [mock_polygon]
-
+    image_on_canvas.root.type_options = ["words"]
+    image_on_canvas.root.color_palette = ["#FF0000"]
     with (
         patch("os.makedirs") as mock_makedirs,
         patch("hashlib.sha256", return_value=MagicMock(hexdigest=lambda: "mockhash")),
@@ -98,24 +99,38 @@ def test_save_json_empty_polygons_returns_message(image_on_canvas):
     assert result.startswith("--> Nothing to save")
 
 
-def test_update_types_updates_colors_and_logs(image_on_canvas, caplog):
-    image_on_canvas.root.type_options = ["default"]
-    image_on_canvas.root.color_palette = ["#000000"]
-    image_on_canvas.root._generate_color_palette = MagicMock(return_value=["#ff0000", "#00ff00"])
-    image_on_canvas.root.label_type = {"values": image_on_canvas.root.type_options}
+def test_load_json_invalid_type_fallback_color(image_on_canvas, mock_annotation_data):
+    json_content = json.dumps(mock_annotation_data)
+    image_on_canvas.image_path = "/some/path/mock_image.jpg"
+    image_on_canvas.root.type_options = ["unknown_type"]
+    with (
+        patch("os.path.exists", return_value=True),
+        patch("builtins.open", mock_open(read_data=json_content)),
+        patch.object(image_on_canvas, "draw_polys") as mock_draw,
+    ):
+        image_on_canvas.load_json()
+        mock_draw.assert_called_once()
+        passed_colors = mock_draw.call_args[0][3]
+        assert passed_colors == ["#808080"]
+    assert image_on_canvas.drawing_polygon is False
 
-    polygon1 = MagicMock(poly_type="invoice")
-    polygon2 = MagicMock(poly_type="receipt")
-    polygon3 = MagicMock(poly_type="default")  # should be ignored for update_color
-    image_on_canvas.polygons = [polygon1, polygon2, polygon3]
 
-    with caplog.at_level(logging.WARNING):
-        image_on_canvas.update_types(["invoice", "receipt"])
+def test_load_json_color_mapping(image_on_canvas, mock_annotation_data):
+    image_on_canvas.image_path = "mock_image.jpg"
+    image_on_canvas.root.type_options = ["words", "document_type", "invoice_id"]
+    image_on_canvas.root.color_palette = ["#FF0000", "#00FF00", "#0000FF"]
+    mock_annotation_data["mock_image.jpg"]["types"] = ["document_type", "invoice_id"]
+    json_content = json.dumps(mock_annotation_data)
 
-    assert "invoice" in image_on_canvas.root.type_options
-    assert "receipt" in image_on_canvas.root.type_options
-    assert len(image_on_canvas.root.color_palette) == 3
-
-    polygon1.update_color.assert_called_once()
-    polygon2.update_color.assert_called_once()
-    polygon3.update_color.assert_not_called()
+    with (
+        patch("os.path.exists", return_value=True),
+        patch("builtins.open", mock_open(read_data=json_content)),
+        patch.object(image_on_canvas, "draw_polys") as mock_draw_polys,
+    ):
+        image_on_canvas.load_json()
+        mock_draw_polys.assert_called_once()
+        actual_types = mock_draw_polys.call_args[0][1]
+        assert actual_types == ["document_type", "invoice_id"]
+        actual_colors = mock_draw_polys.call_args[0][3]
+        assert actual_colors == ["#00FF00", "#0000FF"]
+        assert len(actual_colors) == len(actual_types)

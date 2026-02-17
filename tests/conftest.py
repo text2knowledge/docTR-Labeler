@@ -110,3 +110,15 @@ def mock_mixed_data_folder(tmpdir_factory):
     with open(img_fn, "wb") as f:
         f.write(file.getbuffer())
     return str(temp_folder)
+
+
+@pytest.fixture(scope="session")
+def mock_annotation_data():
+    return {
+        "mock_image.jpg": {
+            "polygons": [[[10, 10], [100, 10], [100, 50], [10, 50]]],
+            "labels": ["INVOICE"],
+            "types": ["document_type"],
+            "type_color_mapping": {"document_type": "#FF5733"},
+        }
+    }

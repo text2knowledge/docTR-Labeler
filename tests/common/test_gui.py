@@ -416,3 +416,23 @@ def test_discard_tight(gui_app):
 
     mock_tight_box.discard_tight_box.assert_called_once()
     gui_app.save_image_button.configure.assert_called_once_with(state="normal")
+
+
+def test_generate_color_palette_alternating_values(gui_app):
+    num_colors = 2
+    palette = gui_app._generate_color_palette(num_colors)
+    assert len(palette) == num_colors
+    assert all(c.startswith("#") for c in palette)
+    assert palette[0] != palette[1]
+
+
+def test_update_color_palette_with_mapping_and_new_types(gui_app):
+    gui_app.type_options = ["words", "header", "footer"]
+    gui_app.color_palette = ["#FF0000", "#000000", "#FFFFFF"]
+    mapping = {"header": "#123456"}
+    gui_app.type_options.append("new_type")
+    gui_app._update_color_palette(mapping)
+
+    assert gui_app.color_palette[1] == "#123456"
+    assert len(gui_app.color_palette) == 4
+    assert gui_app.color_palette[3].startswith("#")
