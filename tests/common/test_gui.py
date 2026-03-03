@@ -45,7 +45,7 @@ def test_show_buttons(gui_app):
     assert str(gui_app.draw_poly_button["state"]) == "normal"
     assert str(gui_app.make_tight_button["state"]) == "normal"
     assert str(gui_app.label_text["state"]) == "normal"
-    assert str(gui_app.label_type["state"]) == "readonly"
+    assert str(gui_app.label_type["state"]) == "normal"
 
 
 def test_toggle_keep_drawing(gui_app):
@@ -154,7 +154,7 @@ def test_show_buttons_enables_buttons(gui_app):
     ]
     for button in buttons:
         assert str(button["state"]) == "normal"
-    assert str(gui_app.label_type["state"]) == "readonly"
+    assert str(gui_app.label_type["state"]) == "normal"
 
 
 def test_select_all(gui_app):
@@ -215,7 +215,7 @@ def test_save_type(gui_app):
     mock_polygon.select_poly = True
     gui_app.img_cnv.polygons = [mock_polygon]
     gui_app.type_variable = Mock()
-    gui_app.type_variable.get.return_value = " polygon_type "
+    gui_app.type_variable.get.return_value = " words "
 
     gui_app.save_image_button = Mock()  # Mock the save_image_button
     gui_app.save_image_button.configure = Mock()  # Mock the configure method
@@ -223,9 +223,26 @@ def test_save_type(gui_app):
     gui_app.save_type()
 
     gui_app.img_cnv.polygons_mutex.__enter__.assert_called_once()
-    assert mock_polygon.poly_type == "polygon_type"
+    assert mock_polygon.poly_type == "words"
     assert not gui_app.img_cnv.current_saved
     gui_app.save_image_button.configure.assert_called_once_with(state="normal")
+
+
+def test_save_type_new_type_check_coverage(gui_app):
+    gui_app.img_cnv = Mock()
+    mutex_mock = Mock()
+    mutex_mock.__enter__ = Mock()
+    mutex_mock.__exit__ = Mock()
+    gui_app.img_cnv.polygons_mutex = mutex_mock
+
+    gui_app.last_selected_polygon = "123"
+    gui_app.type_options = ["valid"]
+    gui_app.type_variable = Mock()
+    gui_app.type_variable.get.return_value = "invalid_xyz"
+
+    gui_app.save_type()
+
+    gui_app.img_cnv.polygons_mutex.__enter__.assert_not_called()
 
 
 def test_load_new_img(gui_app):
@@ -436,3 +453,32 @@ def test_update_color_palette_with_mapping_and_new_types(gui_app):
     assert gui_app.color_palette[1] == "#123456"
     assert len(gui_app.color_palette) == 4
     assert gui_app.color_palette[3].startswith("#")
+
+
+def test_filter_label_type_values(gui_app):
+    gui_app.type_options = ["words", "lines", "header", "paragraph", "footer"]
+
+    gui_app.type_variable.set("")
+    gui_app._filter_label_type_values(None)
+    assert tuple(gui_app.label_type["values"]) == tuple(gui_app.type_options)
+
+    gui_app.type_variable.set("he")
+    gui_app._filter_label_type_values(None)
+    assert tuple(gui_app.label_type["values"]) == ("header",)
+
+    gui_app.type_variable.set("par")
+    gui_app._filter_label_type_values(None)
+    assert tuple(gui_app.label_type["values"]) == ("paragraph",)
+
+    gui_app.type_variable.set("xyz")
+    gui_app._filter_label_type_values(None)
+    assert tuple(gui_app.label_type["values"]) == tuple(gui_app.type_options)
+
+    gui_app.type_variable.set("HEAD")
+    gui_app._filter_label_type_values(None)
+    assert tuple(gui_app.label_type["values"]) == ("header",)
+
+    gui_app.type_options = ["words"]
+    gui_app.type_variable.set("w")
+    gui_app._filter_label_type_values(None)
+    assert tuple(gui_app.label_type["values"]) == ("words",)
