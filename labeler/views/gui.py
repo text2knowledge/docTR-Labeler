@@ -210,8 +210,9 @@ class GUI(tk.Tk):
         # Listener for label type
         self.type_variable.trace_add("write", lambda *args: self.save_type())
         self.label_type = ttk.Combobox(
-            self.top_frame, textvariable=self.type_variable, values=self.type_options, state="readonly"
+            self.top_frame, textvariable=self.type_variable, values=self.type_options, state="normal"
         )
+        self.label_type.bind("<KeyRelease>", self._filter_label_type_values)
         self.progress_bar = ttk.Progressbar(self.top_frame, orient="horizontal", length=100, mode="determinate")
 
         # Canvas
@@ -373,7 +374,15 @@ class GUI(tk.Tk):
         self.draw_poly_button.configure(state="normal")
         self.make_tight_button.configure(state="normal")
         self.label_text.configure(state="normal")
-        self.label_type.configure(state="readonly")
+        self.label_type.configure(state="normal")
+
+    def _filter_label_type_values(self, event: tk.Event | None = None):
+        current_text = self.type_variable.get().strip().lower()
+        if not current_text:
+            self.label_type["values"] = self.type_options
+            return
+        filtered = [t for t in self.type_options if current_text in t.lower()]
+        self.label_type["values"] = filtered or self.type_options
 
     def select_all(self, event: tk.Event | None = None):
         """
@@ -413,10 +422,13 @@ class GUI(tk.Tk):
         if not self.img_cnv or not hasattr(self, "last_selected_polygon"):
             return
 
+        new_type = self.type_variable.get().strip()
+        if new_type not in self.type_options:
+            return
+
         selected_polys = [poly for poly in self.img_cnv.polygons if poly.select_poly]
         if selected_polys:
             with self.img_cnv.polygons_mutex:
-                new_type = self.type_variable.get().strip()
                 for poly in selected_polys:
                     poly.poly_type = new_type
                     self.show_case_type_variable.set(new_type)
