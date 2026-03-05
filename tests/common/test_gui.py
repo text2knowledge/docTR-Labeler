@@ -29,7 +29,7 @@ def test_hide_buttons(gui_app):
     assert str(gui_app.draw_poly_button["state"]) == "disabled"
     assert str(gui_app.make_tight_button["state"]) == "disabled"
     assert str(gui_app.label_text["state"]) == "disabled"
-    assert str(gui_app.label_type["state"]) == "disabled"
+    assert str(gui_app.label_type.entry["state"]) == "disabled"
 
 
 def test_show_buttons(gui_app):
@@ -45,7 +45,7 @@ def test_show_buttons(gui_app):
     assert str(gui_app.draw_poly_button["state"]) == "normal"
     assert str(gui_app.make_tight_button["state"]) == "normal"
     assert str(gui_app.label_text["state"]) == "normal"
-    assert str(gui_app.label_type["state"]) == "normal"
+    assert str(gui_app.label_type.entry["state"]) == "normal"
 
 
 def test_toggle_keep_drawing(gui_app):
@@ -130,7 +130,7 @@ def test_hide_buttons_disables_buttons(gui_app):
         gui_app.draw_poly_button,
         gui_app.make_tight_button,
         gui_app.label_text,
-        gui_app.label_type,
+        gui_app.label_type.entry,
     ]
     for button in buttons:
         assert str(button["state"]) == "disabled"
@@ -154,7 +154,7 @@ def test_show_buttons_enables_buttons(gui_app):
     ]
     for button in buttons:
         assert str(button["state"]) == "normal"
-    assert str(gui_app.label_type["state"]) == "normal"
+    assert str(gui_app.label_type.entry["state"]) == "normal"
 
 
 def test_select_all(gui_app):
@@ -453,32 +453,3 @@ def test_update_color_palette_with_mapping_and_new_types(gui_app):
     assert gui_app.color_palette[1] == "#123456"
     assert len(gui_app.color_palette) == 4
     assert gui_app.color_palette[3].startswith("#")
-
-
-def test_filter_label_type_values(gui_app):
-    gui_app.type_options = ["words", "lines", "header", "paragraph", "footer"]
-
-    gui_app.type_variable.set("")
-    gui_app._filter_label_type_values(None)
-    assert tuple(gui_app.label_type["values"]) == tuple(gui_app.type_options)
-
-    gui_app.type_variable.set("he")
-    gui_app._filter_label_type_values(None)
-    assert tuple(gui_app.label_type["values"]) == ("header",)
-
-    gui_app.type_variable.set("par")
-    gui_app._filter_label_type_values(None)
-    assert tuple(gui_app.label_type["values"]) == ("paragraph",)
-
-    gui_app.type_variable.set("xyz")
-    gui_app._filter_label_type_values(None)
-    assert tuple(gui_app.label_type["values"]) == tuple(gui_app.type_options)
-
-    gui_app.type_variable.set("HEAD")
-    gui_app._filter_label_type_values(None)
-    assert tuple(gui_app.label_type["values"]) == ("header",)
-
-    gui_app.type_options = ["words"]
-    gui_app.type_variable.set("w")
-    gui_app._filter_label_type_values(None)
-    assert tuple(gui_app.label_type["values"]) == ("words",)

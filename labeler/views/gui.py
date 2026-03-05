@@ -12,6 +12,8 @@ import sv_ttk
 import tkinter as tk
 from tkinter import filedialog, ttk
 
+from labeler.custom_widgets.searchable_combobox import SearchableComboBox
+
 from ..automation import TightBox
 from ..components import DrawPoly
 from ..logger import logger
@@ -209,10 +211,8 @@ class GUI(tk.Tk):
         self.type_variable = tk.StringVar(self.top_frame, self.type_options[0])
         # Listener for label type
         self.type_variable.trace_add("write", lambda *args: self.save_type())
-        self.label_type = ttk.Combobox(
-            self.top_frame, textvariable=self.type_variable, values=self.type_options, state="normal"
-        )
-        self.label_type.bind("<KeyRelease>", self._filter_label_type_values)
+        self.label_type = SearchableComboBox(self.top_frame, values=self.type_options)
+        self.label_type.entry.configure(textvariable=self.type_variable)
         self.progress_bar = ttk.Progressbar(self.top_frame, orient="horizontal", length=100, mode="determinate")
 
         # Canvas
@@ -357,7 +357,8 @@ class GUI(tk.Tk):
         self.draw_poly_button.configure(state="disabled")
         self.make_tight_button.configure(state="disabled")
         self.label_text.configure(state="disabled")
-        self.label_type.configure(state="disabled")
+        self.label_type.entry.configure(state="disabled")
+        self.label_type.drop_btn.bind("<Button-1>", lambda e: "break")
 
     def show_buttons(self):
         """
@@ -374,15 +375,8 @@ class GUI(tk.Tk):
         self.draw_poly_button.configure(state="normal")
         self.make_tight_button.configure(state="normal")
         self.label_text.configure(state="normal")
-        self.label_type.configure(state="normal")
-
-    def _filter_label_type_values(self, event: tk.Event | None = None):
-        current_text = self.type_variable.get().strip().lower()
-        if not current_text:
-            self.label_type["values"] = self.type_options
-            return
-        filtered = [t for t in self.type_options if current_text in t.lower()]
-        self.label_type["values"] = filtered or self.type_options
+        self.label_type.entry.configure(state="normal")
+        self.label_type.drop_btn.bind("<Button-1>", lambda e: self.label_type._toggle_dropdown())
 
     def select_all(self, event: tk.Event | None = None):
         """
