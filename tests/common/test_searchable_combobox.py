@@ -93,7 +93,7 @@ class TestSearchableComboBox(unittest.TestCase):
 
         self.combo.popup.withdraw()
         self.assertIsNone(self.combo._on_enter_select(tk.Event()))
-        
+
         self.combo._toggle_dropdown()
         self.combo.listbox.selection_clear(0, tk.END)
         self.assertIsNone(self.combo._on_enter_select(tk.Event()))
