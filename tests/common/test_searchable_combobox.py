@@ -91,6 +91,13 @@ class TestSearchableComboBox(unittest.TestCase):
         self.assertEqual(self.combo._on_enter_select(tk.Event()), "break")
         self.assertEqual(self.combo.entry.get(), "header")
 
+        self.combo.popup.withdraw()
+        self.assertIsNone(self.combo._on_enter_select(tk.Event()))
+        
+        self.combo._toggle_dropdown()
+        self.combo.listbox.selection_clear(0, tk.END)
+        self.assertIsNone(self.combo._on_enter_select(tk.Event()))
+
     def test_on_listbox_click(self):
         self.combo._toggle_dropdown()
         self.combo.listbox.selection_set(2)

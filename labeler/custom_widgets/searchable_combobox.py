@@ -16,13 +16,13 @@ class SearchableComboBox(ttk.Frame):
     and mouse interaction.
     """
 
-    def __init__(self, parent, values, *args, **kwargs):
+    def __init__(self, parent: tk.Misc, values: list[str], *args, **kwargs):
         """
         Initialize the SearchableComboBox.
 
         Args:
             parent: The parent widget.
-            values (list): A list of strings to be displayed in the dropdown.
+            values: A list of strings to be displayed in the dropdown.
             *args: Variable length argument list passed to the tk.Frame.
             **kwargs: Arbitrary keyword arguments passed to the tk.Frame.
         """
@@ -34,7 +34,7 @@ class SearchableComboBox(ttk.Frame):
         self.entry_frame.pack(fill="x", expand=True)
         self.entry = ttk.Entry(self.entry_frame)
         self.entry.pack(side="left", fill="x", expand=True)
-        self.drop_btn = ttk.Label(self.entry_frame, text="\u25bc", cursor="hand2") # unicode arrow down
+        self.drop_btn = ttk.Label(self.entry_frame, text="\u25bc", cursor="hand2")  # unicode arrow down
         self.drop_btn.pack(side="right", fill="y", padx=(0, 5))
         self.drop_btn.bind("<Button-1>", lambda e: self._toggle_dropdown())
 
@@ -58,7 +58,7 @@ class SearchableComboBox(ttk.Frame):
         self.entry.bind("<FocusOut>", self._on_focus_out)
         self.listbox.bind("<FocusOut>", self._on_focus_out)
 
-    def _on_keyrelease(self, event):
+    def _on_keyrelease(self, event: tk.Event) -> None:
         """
         Handle key release events in the entry field for filtering.
 
@@ -77,7 +77,7 @@ class SearchableComboBox(ttk.Frame):
         else:
             self.popup.withdraw()
 
-    def _on_arrow_navigation(self, event):
+    def _on_arrow_navigation(self, event: tk.Event) -> str:
         """
         Handle arrow key navigation within the dropdown list.
 
@@ -106,32 +106,35 @@ class SearchableComboBox(ttk.Frame):
 
         return "break"
 
-    def _update_selection(self, index):
+    def _update_selection(self, index: int) -> None:
         """
         Highlight and scroll to a specific index in the listbox.
 
         Args:
-            index (int): The index of the item to select.
+            index: The index of the item to select.
         """
         self.listbox.selection_clear(0, tk.END)
         self.listbox.selection_set(index)
         self.listbox.activate(index)
         self.listbox.see(index)
 
-    def _on_enter_select(self, event):
+    def _on_enter_select(self, event: tk.Event) -> str | None:
         """
         Select the currently highlighted listbox item when Enter is pressed.
 
         Args:
             event: The Tkinter event object.
+        Returns:
+            str: "break" if an item was selected, else None.
         """
         if self.popup.winfo_viewable():
             selection = self.listbox.curselection()
             if selection:
                 self._select_item(self.listbox.get(selection[0]))
                 return "break"
+        return None
 
-    def _on_listbox_click(self, event):
+    def _on_listbox_click(self, event: tk.Event) -> None:
         """
         Handle mouse click selection in the listbox.
 
@@ -141,19 +144,19 @@ class SearchableComboBox(ttk.Frame):
         if self.listbox.curselection():
             self._select_item(self.listbox.get(self.listbox.curselection()[0]))
 
-    def _select_item(self, value):
+    def _select_item(self, value: str) -> None:
         """
         Update the entry field with the selected value and close the popup.
 
         Args:
-            value (str): The text value to set in the entry.
+            value: The text value to set in the entry.
         """
         self.entry.delete(0, tk.END)
         self.entry.insert(0, value)
         self.popup.withdraw()
         self.entry.focus_set()
 
-    def _toggle_dropdown(self):
+    def _toggle_dropdown(self) -> None:
         """Toggle the visibility of the dropdown popup."""
         if self.popup.winfo_viewable():
             self.popup.withdraw()
@@ -162,18 +165,18 @@ class SearchableComboBox(ttk.Frame):
             self._show_popup()
             self.entry.focus_set()
 
-    def _update_listbox(self, data):
+    def _update_listbox(self, data: list[str]) -> None:
         """
         Clear and refill the listbox with new data.
 
         Args:
-            data (list): List of strings to populate the listbox.
+            data: List of strings to populate the listbox.
         """
         self.listbox.delete(0, tk.END)
         for item in data:
             self.listbox.insert(tk.END, item)
 
-    def _show_popup(self):
+    def _show_popup(self) -> None:
         """
         Calculate position and display the dropdown popup relative to the entry frame.
         """
@@ -185,7 +188,7 @@ class SearchableComboBox(ttk.Frame):
         self.popup.deiconify()
         self.popup.lift()
 
-    def _on_focus_out(self, event):
+    def _on_focus_out(self, event: tk.Event) -> None:
         """
         Trigger a delayed check to hide the popup when focus is lost.
 
@@ -194,7 +197,7 @@ class SearchableComboBox(ttk.Frame):
         """
         self.after(200, self._check_focus)
 
-    def _check_focus(self):
+    def _check_focus(self) -> None:
         """
         Hide the popup if the focus has moved outside the widget's components.
         """
