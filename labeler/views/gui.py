@@ -12,6 +12,8 @@ import sv_ttk
 import tkinter as tk
 from tkinter import filedialog, ttk
 
+from labeler.custom_widgets.searchable_combobox import SearchableComboBox
+
 from ..automation import TightBox
 from ..components import DrawPoly
 from ..logger import logger
@@ -209,9 +211,8 @@ class GUI(tk.Tk):
         self.type_variable = tk.StringVar(self.top_frame, self.type_options[0])
         # Listener for label type
         self.type_variable.trace_add("write", lambda *args: self.save_type())
-        self.label_type = ttk.Combobox(
-            self.top_frame, textvariable=self.type_variable, values=self.type_options, state="readonly"
-        )
+        self.label_type = SearchableComboBox(self.top_frame, values=self.type_options)
+        self.label_type.entry.configure(textvariable=self.type_variable)
         self.progress_bar = ttk.Progressbar(self.top_frame, orient="horizontal", length=100, mode="determinate")
 
         # Canvas
@@ -356,7 +357,8 @@ class GUI(tk.Tk):
         self.draw_poly_button.configure(state="disabled")
         self.make_tight_button.configure(state="disabled")
         self.label_text.configure(state="disabled")
-        self.label_type.configure(state="disabled")
+        self.label_type.entry.configure(state="disabled")
+        self.label_type.drop_btn.bind("<Button-1>", lambda e: "break")
 
     def show_buttons(self):
         """
@@ -373,7 +375,8 @@ class GUI(tk.Tk):
         self.draw_poly_button.configure(state="normal")
         self.make_tight_button.configure(state="normal")
         self.label_text.configure(state="normal")
-        self.label_type.configure(state="readonly")
+        self.label_type.entry.configure(state="normal")
+        self.label_type.drop_btn.bind("<Button-1>", lambda e: self.label_type._toggle_dropdown())
 
     def select_all(self, event: tk.Event | None = None):
         """
@@ -413,10 +416,13 @@ class GUI(tk.Tk):
         if not self.img_cnv or not hasattr(self, "last_selected_polygon"):
             return
 
+        new_type = self.type_variable.get().strip()
+        if new_type not in self.type_options:
+            return
+
         selected_polys = [poly for poly in self.img_cnv.polygons if poly.select_poly]
         if selected_polys:
             with self.img_cnv.polygons_mutex:
-                new_type = self.type_variable.get().strip()
                 for poly in selected_polys:
                     poly.poly_type = new_type
                     self.show_case_type_variable.set(new_type)
