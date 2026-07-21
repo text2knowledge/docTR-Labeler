@@ -20,6 +20,10 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
           architecture: x64
+      # MacOS: use crnn_vgg16_bn as recognition architecture to avoid onnxruntime error
+      - name: Set recognition arch for macOS
+        if: matrix.os == 'macos-latest'
+        run: echo "RECOGNITION_ARCH=crnn_vgg16_bn" >> $GITHUB_ENV
       - name: Cache python modules
         uses: actions/cache@v6
         with:
