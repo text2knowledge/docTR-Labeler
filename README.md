@@ -32,10 +32,13 @@ Python 3.10 (or higher) and [pip](https://pip.pypa.io/en/stable/) are required t
 
 ### Latest release
 
-You can then install the latest release of the package using [pypi](https://pypi.org/project/OnnxTR/) as follows:
+You can then install the latest release of the package using [pypi](https://pypi.org/project/doctr-labeler/) as follows:
 
 ```bash
-pip3 install doctr-labeler
+# Install the CPU version
+pip3 install "doctr-labeler[cpu]"
+# Or with GPU support
+pip3 install "doctr-labeler[gpu]"
 ```
 
 ## Keybindings
